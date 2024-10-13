@@ -4,4 +4,20 @@
 @import "primeng/resources/primeng.css";
 
 // Primeflex
-@import "primeflex/primeflex.css"
+@import "primeflex/primeflex.css";
+
+html{
+  font-size: 14px;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-color);
+  background-color: var(--surface-ground);
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
