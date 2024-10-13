@@ -8,7 +8,7 @@ import { isAuthenticatedGuard, isNotAuthenticatedGuard } from './auth/guards';
 const routes: Routes = [
   {
     path: '',
-    canActivate: [ isNotAuthenticatedGuard ],
+    // canActivate: [ isNotAuthenticatedGuard ],
     loadChildren: () => import('./landing/landing.module').then(m => m.LandingModule)
   },
   {
