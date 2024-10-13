@@ -26,9 +26,9 @@ export class AppComponent {
         this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
         return;
 
-      case AuthStatus.notAuthenticated:
-        this.router.navigateByUrl('/auth/login');
-        return;
+      // case AuthStatus.notAuthenticated:
+      //   this.router.navigateByUrl('/auth/login');
+      //   return;
     }
   });
 }
