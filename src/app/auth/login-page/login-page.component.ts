@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Message } from 'primeng/api';
-import { AuthService } from '../../core/services/auth.service';
-import { ValidationsService } from '../../core/services/validations.service';
+import { AuthService } from '../services/auth.service';
+import { ValidationsService } from '../services/validations.service';
 
 @Component({
     templateUrl: './login-page.component.html',
@@ -13,7 +13,7 @@ import { ValidationsService } from '../../core/services/validations.service';
 export class LoginPageComponent {
 
     private fb = inject( FormBuilder );
-    // private authService = inject( AuthService );
+    private authService = inject( AuthService );
     private validationsService = inject( ValidationsService );
     private router = inject( Router );
 
@@ -32,15 +32,15 @@ export class LoginPageComponent {
 
         const { email, password } = this.loginForm.value;
 
-        // this.authService.login(email, password)
-        // .subscribe({
-        //     next: () => this.router.navigateByUrl('/app'),
-        //     error: (message) => {
-        //         //Swal.fire('Error', message, 'error');
-        //         console.error(message);
-        //         this.messages = [{ severity: 'error', detail: 'El correo o la contraseña son incorrectos' }];
-        //     }
-        // });
+        this.authService.login(email, password)
+        .subscribe({
+         next: () => this.router.navigateByUrl('/app'),
+            error: (message) => {
+                //Swal.fire('Error', message, 'error');
+                console.error(message);
+                this.messages = [{ severity: 'error', detail: 'El correo o la contraseña son incorrectos' }];
+            }
+        });
     }
 
     fieldHasErrors(field: string): boolean {

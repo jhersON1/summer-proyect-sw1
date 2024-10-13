@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, map, mergeMap, Observable, of, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AuthStatus, CheckTokenResponse, LoginResponse, RegisterBody, RegisterResponse, User } from '../interfaces/auth';
+import { AuthStatus, CheckTokenResponse, LoginResponse, RegisterBody, RegisterResponse, User } from '../interfaces';
 
 
 @Injectable({
