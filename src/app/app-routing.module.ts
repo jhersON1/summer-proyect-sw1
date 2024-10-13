@@ -15,7 +15,7 @@ const routes: Routes = [
   },
   {
     path: 'app',
-    component: LayoutPageComponent
+    component: LayoutPageComponent,
   }
 
 ];

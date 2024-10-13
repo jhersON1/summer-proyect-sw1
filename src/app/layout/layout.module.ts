@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { LayoutPageComponent } from './layout-page/layout-page.component';
 import { TopbarComponent } from './components/topbar/topbar.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { ButtonModule } from 'primeng/button';
 
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
 
-
+import { MenuModule } from 'primeng/menu';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   declarations: [
@@ -22,6 +22,7 @@ import { BrowserModule } from '@angular/platform-browser';
     RouterModule,
 
     ButtonModule,
+    MenuModule
   ],
   exports: [
     LayoutPageComponent
