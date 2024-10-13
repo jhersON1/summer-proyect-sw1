@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AuthRoutingModule } from './auth-routing.module';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
-import { LoginPageComponent } from './login-page/login-page.component';
+import { LoginPageComponent } from './pages/login-page/login-page.component';
 
 import { MessagesModule } from 'primeng/messages';
 import { PasswordModule } from 'primeng/password';
@@ -14,11 +14,13 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { StepsModule } from 'primeng/steps';
+import { RegisterPageComponent } from './pages/register-page/register-page.component';
 
 @NgModule({
   declarations: [
     AuthLayoutComponent,
     LoginPageComponent,
+    RegisterPageComponent,
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,82 @@
+<div class="text-center mb-5">
+  <div class="text-900 text-3xl font-medium mb-3">¿Aun no tienes cuenta?</div>
+  <span class="text-600 font-medium">Crea una ahora mismo!</span>
+</div>
+<form [formGroup]="registerForm" (ngSubmit)="register()">
+
+  <div class="mb-4">
+    <label for="nombre" class="block text-900 text-xl font-medium mb-2">
+      Nombre*
+    </label>
+    <input formControlName="nombre" pInputText type="text" id="nombre" class="w-full md:w-30rem" style="padding:1rem"
+      [ngClass]=" fieldHasErrors('nombre') ? 'ng-invalid ng-dirty': '' " placeholder="Nombre">
+    <span *ngIf="fieldHasErrors('nombre')" class="block text-red-500 text-md mt-1 font-italic">
+      * {{ getFieldError('nombre') }}
+    </span>
+  </div>
+  <div class="mb-4">
+    <label for="apellido" class="block text-900 text-xl font-medium mb-2">
+      Apellido*
+    </label>
+    <input formControlName="apellido" pInputText type="text" id="apellido" class="w-full md:w-30rem"
+      style="padding:1rem" [ngClass]=" fieldHasErrors('apellido') ? 'ng-invalid ng-dirty': '' " placeholder="Apellido">
+    <span *ngIf="fieldHasErrors('apellido')" class="block text-red-500 text-md mt-1 font-italic">
+      * {{ getFieldError('apellido') }}
+    </span>
+  </div>
+  <div class="mb-4">
+    <label for="email" class="block text-900 text-xl font-medium mb-2">
+      Correo Electrónico*
+    </label>
+    <input formControlName="email" pInputText type="text" id="email" class="w-full md:w-30rem" style="padding:1rem"
+      [ngClass]=" fieldHasErrors('email') ? 'ng-invalid ng-dirty': '' " placeholder="correo.de@ejemplo.com">
+    <span *ngIf="fieldHasErrors('email')" class="block text-red-500 text-md mt-1 font-italic">
+      * {{ getFieldError('email') }}
+    </span>
+  </div>
+  <div class="mb-4">
+    <label for="password" class="block text-900 text-xl font-medium mb-2">
+      Contraseña*
+    </label>
+    <p-password formControlName="password" id="password" [toggleMask]="true" inputStyleClass="w-full p-3 md:w-30rem"
+      [ngClass]=" fieldHasErrors('password') ? 'ng-invalid ng-dirty': '' " placeholder="**********">
+    </p-password>
+    <span *ngIf="fieldHasErrors('password')" class="block text-red-500 text-md mt-1 font-italic">
+      * {{ getFieldError('password') }}
+    </span>
+  </div>
+  <div class="mb-4">
+    <label for="password_confirm" class="block text-900 text-xl font-medium mb-2">
+      Confirmar contraseña*
+    </label>
+    <p-password formControlName="password_confirm" id="password_confirm" [toggleMask]="true" [feedback]="false"
+      inputStyleClass="w-full p-3 md:w-30rem"
+      [ngClass]=" fieldHasErrors('password_confirm') ? 'ng-invalid ng-dirty': '' " placeholder="**********">
+    </p-password>
+    <span *ngIf="fieldHasErrors('password_confirm')" class="block text-red-500 text-md mt-1 font-italic">
+      * {{ getFieldError('password_confirm') }}
+    </span>
+  </div>
+  <div class="mb-4">
+    <label for="telefono" class="block text-900 text-xl font-medium mb-2">
+      Telefono*
+    </label>
+    <input formControlName="telefono" pInputText type="number" id="telefono" class="w-full md:w-30rem"
+      style="padding:1rem" [ngClass]=" fieldHasErrors('telefono') ? 'ng-invalid ng-dirty': '' " placeholder="1234567"
+      step="1" pattern="[0-9]*">
+    <span *ngIf="fieldHasErrors('telefono')" class="block text-red-500 text-md mt-1 font-italic">
+      * {{ getFieldError('telefono') }}
+    </span>
+  </div>
+
+  <div class="flex align-items-center justify-content-between mb-5 gap-5">
+    <div class="felx align-items-center">
+      <div class="w-5rem"></div>
+    </div>
+    <a routerLink="auth/login" class="font-medium no-underline ml-2 text-right cursor-pointer"
+      style="color: var(--primary-color)">
+      ¿Ya tienes una cuenta?
+    </a>
+  </div>
+  <button type="submit" pButton pRipple label="Registrar" class="w-full p-3 text-xl"></button>
+</form>
