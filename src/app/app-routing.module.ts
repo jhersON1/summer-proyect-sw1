@@ -1,10 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { isNotAuthenticatedGuard } from './auth/guards';
+
+import { LayoutModule } from './layout/layout.module';
+import { LayoutPageComponent } from './layout/layout-page/layout-page.component';
+import { isAuthenticatedGuard, isNotAuthenticatedGuard } from './auth/guards';
 
 const routes: Routes = [
   {
     path: '',
+    canActivate: [ isNotAuthenticatedGuard ],
     loadChildren: () => import('./landing/landing.module').then(m => m.LandingModule)
   },
   {
@@ -13,9 +17,14 @@ const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
+    path: 'app',
+    canActivate: [ isAuthenticatedGuard ],
+    component: LayoutPageComponent,
+  },
+  {
     path: '**',
-    redirectTo: ''
-}
+    redirectTo: 'auth'
+  }
 ];
 
 @NgModule({

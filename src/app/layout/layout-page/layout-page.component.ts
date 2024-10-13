@@ -1,15 +1,14 @@
 import { Component, computed, effect, inject } from '@angular/core';
-import { AuthService } from './auth/services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { Router } from '@angular/router';
-import { AuthStatus } from './auth/interfaces';
+import { AuthStatus } from '../../auth/interfaces';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  selector: 'app-layout-page',
+  templateUrl: './layout-page.component.html',
+  styleUrl: './layout-page.component.scss'
 })
-export class AppComponent {
-  title = 'frontend-apuntable';
+export class LayoutPageComponent {
 
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -26,9 +25,10 @@ export class AppComponent {
         this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
         return;
 
-      // case AuthStatus.notAuthenticated:
-      //   this.router.navigateByUrl('/auth/login');
-      //   return;
+      case AuthStatus.notAuthenticated:
+        this.router.navigateByUrl('/auth/login');
+        return;
     }
   });
+
 }
