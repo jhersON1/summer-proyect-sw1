@@ -1,0 +1,49 @@
+<div class="text-center mb-5">
+    <div class="text-900 text-3xl font-medium mb-3">Bienvenido de vuelta!</div>
+    <span class="text-600 font-medium">Inicia sesión para continuar</span>
+</div>
+
+<p-messages
+    [value]="messages"
+    [enableService]="false"
+    [closable]="false" />
+
+<form [formGroup]="loginForm" (ngSubmit)="login()">
+    <div class="mb-4">
+        <label for="email" class="block text-900 text-xl font-medium mb-2">
+            Correo Electrónico*
+        </label>
+        <input formControlName="email" pInputText type="text"
+            id="email" class="w-full md:w-30rem" style="padding:1rem"
+            [ngClass]=" fieldHasErrors('email') ? 'ng-invalid ng-dirty': '' "
+            placeholder="correo.de@ejemplo.com"
+        >
+        <span *ngIf="fieldHasErrors('email')" class="block text-red-500 text-md mt-1 font-italic">
+            * {{ getFieldError('email') }}
+        </span>
+    </div>
+
+    <div class="mb-4">
+        <label for="password" class="block text-900 text-xl font-medium mb-2">
+            Contraseña*
+        </label>
+        <p-password formControlName="password" id="password"
+            [toggleMask]="true" inputStyleClass="w-full p-3 md:w-30rem"
+            [ngClass]=" fieldHasErrors('password') ? 'ng-invalid ng-dirty': '' "
+            placeholder="**********">
+        </p-password>
+        <span *ngIf="fieldHasErrors('password')" class="block text-red-500 text-md mt-1 font-italic">
+            * {{ getFieldError('password') }}
+        </span>
+    </div>
+
+    <div class="flex align-items-center justify-content-between mb-5 gap-5">
+        <div class="flex align-items-center">
+            <p-checkbox id="rememberme1" [binary]="true" styleClass="mr-2"></p-checkbox>
+            <label for="rememberme1">Recordar sesión</label>
+        </div>
+        <a routerLink="/auth/register" class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">¿Aún no tienes una cuenta?</a>
+    </div>
+    <button type="submit" pButton pRipple label="Ingresar" class="w-full p-3 text-xl"></button>
+</form>
+
