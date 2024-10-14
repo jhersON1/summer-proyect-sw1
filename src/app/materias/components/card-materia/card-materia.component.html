@@ -1,15 +1,17 @@
-<p-card header="Materia" subheader="Subtitulo" [style]="{ width: '100%', overflow: 'hidden'}">
+<p-card [header]="materia.nombre" [style]="{ width: '100%', overflow: 'hidden'}">
   <ng-template pTemplate="header">
       <img alt="Card" class="w-full" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
   </ng-template>
   <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore sed consequuntur error repudiandae numquam deserunt quisquam repellat libero asperiores earum nam nobis, culpa ratione quam perferendis esse, cupiditate neque
-      quas!
+      {{materia.descripcion}}
   </p>
   <ng-template pTemplate="footer">
       <div class="flex gap-3 mt-1">
-          <p-button label="Entrar" outlined class="w-full" styleClass="w-full" />
+          <p-button label="Entrar" outlined class="w-full" styleClass="w-full" [routerLink]="['/materia', materia.id]" />
+          <p-button icon="pi pi-ellipsis-v" (onClick)="menu.toggle($event)" outlined severity="secondary"/>
           <p-button icon="pi pi-share-alt" severity="primary"/>
       </div>
   </ng-template>
 </p-card>
+
+<p-menu #menu [model]="materiaOptions" [popup]="true" />

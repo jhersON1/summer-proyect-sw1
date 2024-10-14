@@ -24,16 +24,10 @@
 </p-card>
 
 <div class="grid">
-  <div class="col-12 md:col-6 lg:col-4 xl:col-3">
-    <app-card-materia></app-card-materia>
-  </div>
-  <div class="col-12 md:col-6 lg:col-4 xl:col-3">
-    <app-card-materia></app-card-materia>
-  </div>
-  <div class="col-12 md:col-6 lg:col-4 xl:col-3">
-    <app-card-materia></app-card-materia>
-  </div>
-  <div class="col-12 md:col-6 lg:col-4 xl:col-3">
-    <app-card-materia></app-card-materia>
+  <div *ngFor="let materia of materias"
+  class="col-12 md:col-6 lg:col-4 xl:col-3">
+
+    <app-card-materia [materia]="materia" />
+
   </div>
 </div>

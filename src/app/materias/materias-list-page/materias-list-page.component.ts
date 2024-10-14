@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
+import { MateriaService } from '../services/materia.service';
+import { Materia } from '../interfaces/materia.interface';
 
 @Component({
   selector: 'app-materias-list-page',
@@ -8,23 +10,38 @@ import { Router } from '@angular/router';
   styleUrl: './materias-list-page.component.scss'
 })
 export class MateriasListPageComponent implements OnInit{
-  tabItems: MenuItem[] | undefined;
+  tabItems: MenuItem[] = [];
   activeItem : MenuItem | undefined;
 
-  constructor(private router: Router) {}
+  materias : Materia[] = [];
+
+  constructor(
+    private router: Router,
+    private materiaService :MateriaService,
+  ) {}
 
   ngOnInit() {
-      this.tabItems = [
-          { label: 'Materias', icon: 'pi pi-home' },
-          {
-              label: 'Compartido Conmigo',
-              icon: 'pi pi-palette',
-              command: () => {
-                  this.router.navigate(['/shared']);
-              }
-          },
-      ];
+    this.tabItems = [
+        { label: 'Materias', icon: 'pi pi-home' },
+        {
+            label: 'Compartido Conmigo',
+            icon: 'pi pi-palette',
+            command: () => {
+                this.router.navigate(['/shared']);
+            }
+        },
+    ];
 
-      this.activeItem = this.tabItems[0];
+    this.activeItem = this.tabItems[0];
+    this.loadMaterias();
   }
+
+  loadMaterias() : void{
+    this.materiaService.getMaterias().subscribe((materias: Materia[]) => {
+      this.materias = materias;
+      console.log(this.materias);
+    });
+  }
+
+  
 }

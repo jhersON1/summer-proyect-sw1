@@ -26,7 +26,6 @@ export class TopbarComponent implements OnInit {
                         icon: 'pi pi-logout',
                         command: () => {
                           this.authService.logout()
-
                         },
                     },
                 ]

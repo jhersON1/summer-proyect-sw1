@@ -9,6 +9,7 @@ import { CardMateriaComponent } from './components/card-materia/card-materia.com
 import { TabMenuModule } from 'primeng/tabmenu';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { MenuModule } from 'primeng/menu';
 
 
 @NgModule({
@@ -24,6 +25,7 @@ import { CardModule } from 'primeng/card';
     TabMenuModule,
     CardModule,
     ButtonModule,
+    MenuModule,
   ]
 })
 export class MateriasModule { }
