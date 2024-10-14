@@ -7,13 +7,11 @@
         Apuntable
       </div>
     </div>
-    <div class="flex gap-2">
+    <div class="flex gap-2 ml-auto">
       <p-button label="Home" icon="pi pi-home" iconPos="left"></p-button>
       <p-button label="About" icon="pi pi-info-circle" iconPos="left"></p-button>
-
-      <p-menu #menu [model]="items" [popup]="true" />
       <p-button (onClick)="menu.toggle($event)" icon="pi pi-ellipsis-v"/>
-
     </div>
+    <p-menu #menu [model]="items" [popup]="true" />
   </div>
 </div>
