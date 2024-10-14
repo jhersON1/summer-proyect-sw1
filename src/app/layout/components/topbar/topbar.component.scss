@@ -9,5 +9,6 @@
 
 
     backdrop-filter: blur(5px); // Ajusta el valor del blur según lo necesites
+    z-index: 1000;  //Evita que otros componentes lo tapen
   }
 }
