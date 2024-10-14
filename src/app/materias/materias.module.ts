@@ -6,6 +6,7 @@ import { MateriasListPageComponent } from './materias-list-page/materias-list-pa
 import { NewMateriaComponent } from './components/new-materia/new-materia.component';
 import { CardMateriaComponent } from './components/card-materia/card-materia.component';
 
+import { TabMenuModule } from 'primeng/tabmenu';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 
@@ -20,8 +21,9 @@ import { CardModule } from 'primeng/card';
     CommonModule,
     MateriasRoutingModule,
 
+    TabMenuModule,
     CardModule,
-    ButtonModule
+    ButtonModule,
   ]
 })
 export class MateriasModule { }

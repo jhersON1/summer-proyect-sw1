@@ -1,3 +1,28 @@
+<p-card [style]="{ height: '100px'}" class="p-4">
+  <div class="flex align-items-center">
+    <p-tabMenu [model]="tabItems" [activeItem]="activeItem">
+      <ng-template pTemplate="item" let-item>
+          <ng-container *ngIf="item.route; else elseBlock">
+              <a [routerLink]="item.route" class="p-menuitem-link">
+                  <span [class]="item.icon"></span>
+                  <span class="ml-2">
+                      {{ item.label }}
+                  </span>
+              </a>
+          </ng-container>
+          <ng-template #elseBlock>
+              <a [href]="item.url" class="p-menuitem-link">
+                  <span [class]="item.icon"></span>
+                  <span class="ml-2">
+                      {{ item.label }}
+                  </span>
+              </a>
+          </ng-template>
+      </ng-template>
+    </p-tabMenu>
+  </div>
+</p-card>
+
 <div class="grid">
   <div class="col-12 md:col-6 lg:col-4 xl:col-3">
     <app-card-materia></app-card-materia>
