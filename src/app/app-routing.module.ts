@@ -20,6 +20,12 @@ const routes: Routes = [
     path: 'app',
     canActivate: [ isAuthenticatedGuard ],
     component: LayoutPageComponent,
+    children: [
+      {
+        path: 'apuntes',
+        loadChildren: () => import('./apuntes/apuntes.module').then(m => m.ApuntesModule),
+      }
+    ]
   },
   {
     path: '**',
