@@ -20,6 +20,7 @@ const routes: Routes = [
     path: 'app',
     canActivate: [ isAuthenticatedGuard ],
     component: LayoutPageComponent,
+    loadChildren: () => import('./materias/materias.module').then(m => m.MateriasModule)
   },
   {
     path: '**',
