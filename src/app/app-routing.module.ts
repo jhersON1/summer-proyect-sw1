@@ -20,12 +20,7 @@ const routes: Routes = [
     path: 'app',
     canActivate: [ isAuthenticatedGuard ],
     component: LayoutPageComponent,
-    children: [
-      {
-        path: 'apuntes',
-        loadChildren: () => import('./apuntes/apuntes.module').then(m => m.ApuntesModule),
-      }
-    ]
+    loadChildren: () => import('./materias/materias.module').then(m => m.MateriasModule)
   },
   {
     path: '**',

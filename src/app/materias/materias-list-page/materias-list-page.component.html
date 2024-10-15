@@ -1,0 +1,22 @@
+<app-new-materia [(showCreateMateria)]="showCreateMateria" (nuevaMateriaEvent)="onNuevaMateria($event)"/>
+
+<p-toast position="bottom-right"/>
+
+<div class="flex flex-row flex-wrap bg-white m-4 p-4 border-round shadow-2 ">
+  <div>
+    <p-tabMenu [model]="tabItems" [activeItem]="activeItem">
+    </p-tabMenu>
+  </div>
+
+  <div class="w-full align-content-center py-3 md:w-3 xl:w-1 ml-auto">
+    <p-button label="Nueva materia" [style]="{width: '100%'}" (onClick)="toggleCreateMateria()"/>
+  </div>
+</div>
+
+<div class="grid px-4">
+  <div *ngFor="let materia of materias"
+    class="col-12 md:col-6 lg:col-4 xl:col-3">
+      <app-card-materia [materia]="materia" (materiaEliminada)="onMateriaEliminada($event)"/>
+  </div>
+</div>
+
