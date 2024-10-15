@@ -10,6 +10,8 @@ import { TabMenuModule } from 'primeng/tabmenu';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MenuModule } from 'primeng/menu';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 
 @NgModule({
@@ -26,6 +28,10 @@ import { MenuModule } from 'primeng/menu';
     CardModule,
     ButtonModule,
     MenuModule,
+    ToastModule
+  ],
+  providers:[
+    MessageService
   ]
 })
 export class MateriasModule { }

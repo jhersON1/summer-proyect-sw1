@@ -1,3 +1,4 @@
+<p-toast position="bottom-right"/>
 <div class="flex flex-row flex-wrap bg-white m-4 p-4 border-round shadow-2">
   <div>
     <p-tabMenu [model]="tabItems" [activeItem]="activeItem">
@@ -11,9 +12,9 @@
 
 <div class="grid">
   <div *ngFor="let materia of materias"
-  class="col-12 md:col-6 lg:col-4 xl:col-3">
-
-    <app-card-materia [materia]="materia" (materiaEliminada)="onMateriaEliminada($event)"/>
-
+    class="col-12 md:col-6 lg:col-4 xl:col-3">
+      <app-card-materia [materia]="materia" (materiaEliminada)="onMateriaEliminada($event)"/>
   </div>
 </div>
+
+

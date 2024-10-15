@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MateriaService } from '../services/materia.service';
 import { Materia } from '../interfaces/materia.interface';
@@ -18,6 +18,7 @@ export class MateriasListPageComponent implements OnInit{
   constructor(
     private router: Router,
     private materiaService :MateriaService,
+    private messageService: MessageService,  // Esto es para las notificaciones de primeng
   ) {}
 
   ngOnInit() {
@@ -44,10 +45,25 @@ export class MateriasListPageComponent implements OnInit{
   }
 
   onMateriaEliminada(materiaId: number) {
-    this.materiaService.deleteMateria(materiaId).subscribe( () => {
-        console.log('materia eliminada con id ' + materiaId)
+
+    this.materiaService.deleteMateria(materiaId).subscribe({
+      next: () => {
         this.materias = this.materias.filter(m => m.id !== materiaId);
+      },
+      error: (error) => {
+        this.showError()
       }
-    )
+    });
+
+  }
+
+  showError() {
+    this.messageService.add(
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Materia no borrada por X motivo'
+      }
+    );
   }
 }

@@ -25,7 +25,6 @@ export class CardMateriaComponent implements OnInit {
         label: 'Borrar Materia',
         icon: 'pi pi-trash',
         command: () => {
-          console.log('materia eliminada con id: ' + this.materia.id)
           this.materiaEliminada.emit(this.materia.id);
         },
       }
