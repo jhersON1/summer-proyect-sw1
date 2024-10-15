@@ -3,6 +3,7 @@ import { MenuItem, MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MateriaService } from '../services/materia.service';
 import { Materia } from '../interfaces/materia.interface';
+import { CreateMateria } from '../interfaces/create-materia.interface';
 
 @Component({
   selector: 'app-materias-list-page',
@@ -14,6 +15,8 @@ export class MateriasListPageComponent implements OnInit{
   activeItem : MenuItem | undefined;
 
   materias : Materia[] = [];
+
+  showCreateMateria: boolean = false;
 
   constructor(
     private router: Router,
@@ -40,12 +43,10 @@ export class MateriasListPageComponent implements OnInit{
   loadMaterias() : void{
     this.materiaService.getMaterias().subscribe((materias: Materia[]) => {
       this.materias = materias;
-      console.log(this.materias);
     });
   }
 
-  onMateriaEliminada(materiaId: number) {
-
+  onMateriaEliminada(materiaId: number): void {
     this.materiaService.deleteMateria(materiaId).subscribe({
       next: () => {
         this.materias = this.materias.filter(m => m.id !== materiaId);
@@ -54,10 +55,17 @@ export class MateriasListPageComponent implements OnInit{
         this.showError()
       }
     });
-
   }
 
-  showError() {
+  onNuevaMateria(nuevaMateria: CreateMateria) :void {
+    console.log('añadir materia a la lista')
+  }
+
+  toggleCreateMateria():void{
+    this.showCreateMateria = true;
+  }
+
+  showError():void {
     this.messageService.add(
       {
         severity: 'error',
@@ -66,4 +74,7 @@ export class MateriasListPageComponent implements OnInit{
       }
     );
   }
+
+
+
 }

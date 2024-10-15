@@ -12,6 +12,12 @@ import { CardModule } from 'primeng/card';
 import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { DialogModule } from 'primeng/dialog';
+import { AvatarModule } from 'primeng/avatar';
+import { AvatarGroupModule } from 'primeng/avatargroup';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -23,12 +29,19 @@ import { MessageService } from 'primeng/api';
   imports: [
     CommonModule,
     MateriasRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
 
     TabMenuModule,
     CardModule,
     ButtonModule,
     MenuModule,
-    ToastModule
+    ToastModule,
+    DialogModule,
+    AvatarModule,
+    AvatarGroupModule,
+    InputTextModule,
+    InputTextareaModule
   ],
   providers:[
     MessageService
