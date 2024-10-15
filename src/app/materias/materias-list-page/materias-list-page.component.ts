@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MateriaService } from '../services/materia.service';
 import { Materia } from '../interfaces/materia.interface';
 import { CreateMateria } from '../interfaces/create-materia.interface';
+import { CreateMateriaResponse } from '../interfaces/create-materia-response.interface';
 
 @Component({
   selector: 'app-materias-list-page',
@@ -57,8 +58,14 @@ export class MateriasListPageComponent implements OnInit{
     });
   }
 
-  onNuevaMateria(nuevaMateria: CreateMateria) :void {
-    console.log('añadir materia a la lista')
+  onNuevaMateria(nuevaMateria: CreateMateriaResponse) :void {
+    const newMateria: Materia = {
+      id : nuevaMateria.id,
+      nombre : nuevaMateria.nombre,
+      descripcion : nuevaMateria.descripcion
+    }
+
+    this.materias.push(newMateria);
   }
 
   toggleCreateMateria():void{
