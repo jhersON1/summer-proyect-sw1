@@ -1,7 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Materia } from '../../interfaces/materia.interface';
 import { MenuItem } from 'primeng/api';
-import { MateriaService } from '../../services/materia.service';
 
 @Component({
   selector: 'app-card-materia',
@@ -14,8 +13,10 @@ export class CardMateriaComponent implements OnInit {
   @Input()
   materia! : Materia;
 
+  @Output()
+  materiaEliminada : EventEmitter<number> = new EventEmitter<number>();
+
   constructor(
-    private materiaService: MateriaService
   ){}
 
   ngOnInit(): void {
@@ -24,9 +25,8 @@ export class CardMateriaComponent implements OnInit {
         label: 'Borrar Materia',
         icon: 'pi pi-trash',
         command: () => {
-          this.materiaService.deleteMateria(this.materia.id).subscribe(() => {
-            console.log('materia borrada con id ' + this.materia.id);
-          });
+          console.log('materia eliminada con id: ' + this.materia.id)
+          this.materiaEliminada.emit(this.materia.id);
         },
       }
     ]

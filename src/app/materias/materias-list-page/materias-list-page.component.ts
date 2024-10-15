@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MateriaService } from '../services/materia.service';
@@ -24,7 +24,7 @@ export class MateriasListPageComponent implements OnInit{
     this.tabItems = [
         { label: 'Materias', icon: 'pi pi-home' },
         {
-            label: 'Compartido Conmigo',
+            label: 'Compartido',
             icon: 'pi pi-palette',
             command: () => {
                 this.router.navigate(['/shared']);
@@ -43,5 +43,11 @@ export class MateriasListPageComponent implements OnInit{
     });
   }
 
-  
+  onMateriaEliminada(materiaId: number) {
+    this.materiaService.deleteMateria(materiaId).subscribe( () => {
+        console.log('materia eliminada con id ' + materiaId)
+        this.materias = this.materias.filter(m => m.id !== materiaId);
+      }
+    )
+  }
 }
