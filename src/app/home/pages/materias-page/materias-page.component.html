@@ -14,17 +14,10 @@
 <!-- ELemento de Notificacion -->
 <p-toast position="bottom-right"/>
 
-<div class="flex flex-row flex-wrap bg-white m-4 p-4 border-round shadow-2 ">
-  <!-- Botones de home y compartido -->
-  <div>
-    <p-tabMenu [model]="tabItems" [activeItem]="activeItem">
-    </p-tabMenu>
-  </div>
 
-  <!-- boton de nueva materia  -->
-  <div class="w-full align-content-center py-3 md:w-3 xl:w-1 ml-auto">
-    <p-button label="Nueva materia" [style]="{width: '100%'}" (onClick)="toggleCreateMateria()"/>
-  </div>
+<!-- boton de nueva materia  -->
+<div class="w-full align-content-center px-4 pb-4 md:w-3 xl:w-2">
+  <p-button label="Nueva materia" [style]="{width: '100%'}" (onClick)="toggleCreateMateria()"/>
 </div>
 
 <!-- Lista de materias -->

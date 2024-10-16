@@ -13,9 +13,6 @@ import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
   styleUrl: './materias-page.component.scss'
 })
 export class MateriasPageComponent implements OnInit{
-  tabItems: MenuItem[] = [];
-  activeItem: MenuItem | undefined;
-
   materias: Materia[] = [];
 
   showCreateMateria: boolean = false;
@@ -30,18 +27,6 @@ export class MateriasPageComponent implements OnInit{
   ) {}
 
   ngOnInit() {
-    this.tabItems = [
-      { label: 'Materias', icon: 'pi pi-home' },
-      {
-        label: 'Compartido',
-        icon: 'pi pi-palette',
-        command: () => {
-          this.router.navigate(['/shared']);
-        },
-      },
-    ];
-
-    this.activeItem = this.tabItems[0];
     this.loadMaterias();
   }
 

@@ -21,11 +21,7 @@ const routes: Routes = [
     path: 'app',
     canActivate: [isAuthenticatedGuard],
     component: LayoutPageComponent,
-    children: [
-      { path: '', redirectTo: 'materias', pathMatch: 'full' }, // Redirect to /app/materia
-      { path: 'materias', component: MateriasPageComponent },
-      { path: 'compartidos', component: CompartidosPageComponent },
-    ]
+    loadChildren: () => import('./home/home.module').then(m => m.HomeModule)
   },
   {
     path: '**',

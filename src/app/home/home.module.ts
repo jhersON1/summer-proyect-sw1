@@ -21,6 +21,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { HomeLayoutComponent } from './layout/home-layout/home-layout.component';
+import { HomeRoutingModule } from './home-routing.module';
 
 @NgModule({
   declarations: [
@@ -28,10 +30,12 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     CardMateriaComponent,
     NewMateriaComponent,
     EditMateriaComponent,
-    CompartidosPageComponent
+    CompartidosPageComponent,
+    HomeLayoutComponent
   ],
   imports: [
     CommonModule,
+    HomeRoutingModule,
     ReactiveFormsModule,
     FormsModule,
 
