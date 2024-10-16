@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { MateriasRoutingModule } from './materias-routing.module';
 import { MateriasListPageComponent } from './materias-list-page/materias-list-page.component';
@@ -11,20 +12,22 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { EditMateriaComponent } from './components/edit-materia/edit-materia.component';
 
 
 @NgModule({
   declarations: [
     CardMateriaComponent,
     MateriasListPageComponent,
-    NewMateriaComponent
+    NewMateriaComponent,
+    EditMateriaComponent
   ],
   imports: [
     CommonModule,
@@ -41,10 +44,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     AvatarModule,
     AvatarGroupModule,
     InputTextModule,
-    InputTextareaModule
+    InputTextareaModule,
+    ConfirmDialogModule
   ],
   providers:[
-    MessageService
+    MessageService,
+    ConfirmationService,
   ]
 })
 export class MateriasModule { }

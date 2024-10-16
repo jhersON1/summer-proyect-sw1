@@ -33,10 +33,10 @@ export class MateriaService {
     return this.http.get<Materia>(url);
   }
 
-  updateMateria(id: number, updatedMateria: UpdateMateria): Observable<void> {
+  updateMateria(id: number, updatedMateria: UpdateMateria): Observable<Materia> {
     const url = `${this.apiUrl}/materia/${id}`;
     const body = updatedMateria;
-    return this.http.put<void>(url, body);
+    return this.http.put<Materia>(url, body);
   }
 
   deleteMateria(id: number): Observable<void> {
