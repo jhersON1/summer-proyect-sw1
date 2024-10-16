@@ -1,15 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { MenuItem, MessageService } from 'primeng/api';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MateriaService } from '../services/materia.service';
-import { Materia } from '../interfaces/materia.interface';
+
+import { Materia } from '../../interfaces/materia.interface';
+import { MateriaService } from '../../services/materia.service';
+import { CreateMateriaResponse } from '../../interfaces/create-materia-response.interface';
+
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 
 @Component({
-  selector: 'app-materias-list-page',
-  templateUrl: './materias-list-page.component.html',
-  styleUrl: './materias-list-page.component.scss'
+  selector: 'app-materias-page',
+  templateUrl: './materias-page.component.html',
+  styleUrl: './materias-page.component.scss'
 })
-export class MateriasListPageComponent implements OnInit{
+export class MateriasPageComponent implements OnInit{
   tabItems: MenuItem[] = [];
   activeItem: MenuItem | undefined;
 

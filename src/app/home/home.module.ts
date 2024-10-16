@@ -5,6 +5,7 @@ import { MateriasPageComponent } from './pages/materias-page/materias-page.compo
 import { NewMateriaComponent } from './components/new-materia/new-materia.component';
 import { CardMateriaComponent } from './components/card-materia/card-materia.component';
 import { CompartidosPageComponent } from './pages/compartidos-page/compartidos-page.component';
+import { EditMateriaComponent } from './components/edit-materia/edit-materia.component';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TabMenuModule } from 'primeng/tabmenu';
@@ -19,13 +20,14 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @NgModule({
   declarations: [
     MateriasPageComponent,
     CardMateriaComponent,
     NewMateriaComponent,
+    EditMateriaComponent,
     CompartidosPageComponent
   ],
   imports: [
@@ -42,11 +44,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     AvatarModule,
     AvatarGroupModule,
     InputTextModule,
-    InputTextareaModule
+    InputTextareaModule,
+    ConfirmDialogModule,
   ],
   providers:[
     MessageService,
     ConfirmationService,
   ]
 })
-export class MateriasModule { }
+export class HomeModule { }
