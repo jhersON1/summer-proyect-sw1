@@ -2,15 +2,15 @@
 <div class="layout-topbar p-3 sm:p-5" style="z-index: 1000;">
   <div class="flex justify-content-between align-items-center">
     <div class="flex">
-      <i class="pi pi-user ml-2" style="font-size: 2rem"></i>
+      <i class="pi pi-pencil ml-2" style="font-size: 1.5rem"></i>
       <div class="text-2xl font-bold hidden sm:inline-block ml-2">
         Apuntable
       </div>
     </div>
     <div class="flex gap-2 ml-auto">
-      <p-button label="Home" icon="pi pi-home" iconPos="left"></p-button>
-      <p-button label="About" icon="pi pi-info-circle" iconPos="left"></p-button>
-      <p-button (onClick)="menu.toggle($event)" icon="pi pi-ellipsis-v"/>
+      <p-button label="Home" icon="pi pi-home" iconPos="left" outlined [routerLink]="['app/materia']"></p-button>
+      <p-button label="About" icon="pi pi-info-circle" iconPos="left" outlined></p-button>
+      <p-button (onClick)="menu.toggle($event)" icon="pi pi-ellipsis-v" outlined/>
     </div>
     <p-menu #menu [model]="items" [popup]="true" />
   </div>

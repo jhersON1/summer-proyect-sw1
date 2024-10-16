@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CreateMateria } from '../../interfaces/create-materia.interface';
 import { MateriaService } from '../../services/materia.service';
+import { CreateMateria } from '../../interfaces/create-materia.interface';
+import { CreateMateriaResponse } from '../../interfaces/create-materia-response.interface';
 
 @Component({
   selector: 'app-new-materia',
@@ -16,7 +17,7 @@ export class NewMateriaComponent {
   showCreateMateriaChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   @Output()
-  nuevaMateriaEvent: EventEmitter<CreateMateria> = new EventEmitter<CreateMateria>();
+  nuevaMateriaEvent: EventEmitter<CreateMateriaResponse> = new EventEmitter<CreateMateriaResponse>();
 
   constructor(
     private formBuilder: FormBuilder,
@@ -52,13 +53,15 @@ export class NewMateriaComponent {
     }
 
     this.materiaService.addMateria(nuevaMateria).subscribe({
-      next: (response) => {
-        console.log('Materia created successfully', response);
+      next: (nuevaMateria: CreateMateriaResponse) => {
+        console.log('Materia created successfully', nuevaMateria);
         this.nuevaMateriaEvent.emit(nuevaMateria);
       },
       error: (error) => {
         console.error('Error creating materia', error);
       }
     });
+
+    this.cerrarDialog()
   }
 }

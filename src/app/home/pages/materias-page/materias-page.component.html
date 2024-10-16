@@ -1,20 +1,31 @@
-<app-new-materia [(showCreateMateria)]="showCreateMateria" (nuevaMateriaEvent)="onNuevaMateria($event)" />
+<!-- Dialog para crear materia -->
+<app-new-materia [(showCreateMateria)]="showCreateMateria" (nuevaMateriaEvent)="onNuevaMateria($event)"/>
 
-<p-toast position="bottom-right" />
+<!-- Dialog para editar materia -->
+<app-edit-materia
+  [(showEditMateria)]="showEditMateria"
+  [materia]="selectedMateriaEditar"
+  (materiaEditada)="onMateriaEditada($event)"
+></app-edit-materia>
 
-<div class="flex flex-row flex-wrap bg-white m-4 p-4 border-round shadow-2 ">
-  <div>
-    <p-tabMenu [model]="tabItems" [activeItem]="activeItem">
-    </p-tabMenu>
-  </div>
+<!-- Dialog para confirmar eliminar materia -->
+<p-confirmDialog />
 
-  <div class="w-full align-content-center py-3 md:w-3 xl:w-1 ml-auto">
-    <p-button label="Nueva materia" [style]="{width: '100%'}" (onClick)="toggleCreateMateria()" />
-  </div>
+<!-- ELemento de Notificacion -->
+<p-toast position="bottom-right"/>
+
+<!-- boton de nueva materia  -->
+<div class="w-full align-content-center pb-4 md:w-3 xl:w-2">
+  <p-button label="Nueva materia" [style]="{width: '100%'}" (onClick)="toggleCreateMateria()"/>
 </div>
 
-<div class="grid px-4">
-  <div *ngFor="let materia of materias" class="col-12 md:col-6 lg:col-4 xl:col-3">
-    <app-card-materia [materia]="materia" (materiaEliminada)="onMateriaEliminada($event)" />
+<!-- Lista de materias -->
+<div class="grid">
+  <div *ngFor="let materia of materias"
+    class="col-12 md:col-6 lg:col-4 xl:col-3">
+      <app-card-materia [materia]="materia"
+       (materiaEliminada)="onMateriaEliminada($event)"
+       (materiaSeleccionadaEditar)="onMateriaSeleccionadaEditar(materia)"
+       />
   </div>
 </div>
