@@ -3,8 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { LayoutPageComponent } from './layout/layout-page/layout-page.component';
 import { isAuthenticatedGuard, isNotAuthenticatedGuard } from './auth/guards';
-import { MateriasPageComponent } from './home/pages/materias-page/materias-page.component';
-import { CompartidosPageComponent } from './home/pages/compartidos-page/compartidos-page.component';
 
 const routes: Routes = [
   {
