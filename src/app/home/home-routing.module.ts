@@ -5,28 +5,27 @@ import { MateriasPageComponent } from './pages/materias-page/materias-page.compo
 import { CompartidosPageComponent } from './pages/compartidos-page/compartidos-page.component';
 
 const routes: Routes = [
-  { path: '',
-    redirectTo: 'materias', pathMatch: 'full'
+  {
+    path: '',
+    redirectTo: 'materia', pathMatch: 'full'
   }, // Redirect to /app/materia
   {
     path:'',
     component: HomeLayoutComponent,
     children:[
       {
-        path: 'materias',
+        path: 'materia',
         component: MateriasPageComponent,
-        // children:[
-        //   {
-        //     path: ':id',
-        //     loadChildren: () => import('./temas/temas.module.ts').then(m => m.TemasModule),
-        //   }
-        // ]
       },
       {
         path: 'compartido',
         component: CompartidosPageComponent
       },
     ]
+  },
+  {
+    path: 'materia/:materiaId',
+    loadChildren: () => import('../contenido/contenido.module').then(m => m.ContenidoModule)
   },
 ];
 
