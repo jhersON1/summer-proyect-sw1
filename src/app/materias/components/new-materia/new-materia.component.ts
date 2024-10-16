@@ -61,5 +61,7 @@ export class NewMateriaComponent {
         console.error('Error creating materia', error);
       }
     });
+
+    this.cerrarDialog()
   }
 }
