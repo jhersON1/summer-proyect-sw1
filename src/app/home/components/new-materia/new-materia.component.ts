@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MateriaService } from '../../services/materia.service';
 import { CreateMateria } from '../../interfaces/create-materia.interface';
+import { MateriaService } from '../../services/materia.service';
 
 @Component({
   selector: 'app-new-materia',

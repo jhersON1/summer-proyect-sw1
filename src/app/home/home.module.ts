@@ -1,11 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { MateriasRoutingModule } from './materias-routing.module';
-import { MateriasListPageComponent } from './materias-list-page/materias-list-page.component';
-import { NewMateriaComponent } from './components/new-materia/new-materia.component';
-import { CardMateriaComponent } from './components/card-materia/card-materia.component';
-
 import { TabMenuModule } from 'primeng/tabmenu';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -18,17 +13,20 @@ import { AvatarGroupModule } from 'primeng/avatargroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { MateriasPageComponent } from './pages/materias-page/materias-page.component';
+import { CardMateriaComponent } from './components/card-materia/card-materia.component';
+import { NewMateriaComponent } from './components/new-materia/new-materia.component';
+import { CompartidosPageComponent } from './pages/compartidos-page/compartidos-page.component';
 
 @NgModule({
   declarations: [
+    MateriasPageComponent,
     CardMateriaComponent,
-    MateriasListPageComponent,
-    NewMateriaComponent
+    NewMateriaComponent,
+    CompartidosPageComponent
   ],
   imports: [
     CommonModule,
-    MateriasRoutingModule,
     ReactiveFormsModule,
     FormsModule,
 
@@ -47,4 +45,4 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MessageService
   ]
 })
-export class MateriasModule { }
+export class HomeModule { }
