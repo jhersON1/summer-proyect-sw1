@@ -6,6 +6,10 @@ const routes: Routes = [
   {
     path: '',
     component: MateriasListPageComponent
+  },
+  {
+    path: 'materia/:id',
+    loadChildren: () => import('../contenido/contenido.module').then(m => m.ContenidoModule)
   }
 ];
 

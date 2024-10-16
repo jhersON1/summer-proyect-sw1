@@ -1,16 +1,16 @@
 <p-card [header]="materia.nombre" [style]="{ width: '100%', overflow: 'hidden'}">
   <ng-template pTemplate="header">
-      <img alt="Card" class="w-full" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
+    <img alt="Card" class="w-full" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" />
   </ng-template>
   <p>
-      {{materia.descripcion}}
+    {{materia.descripcion}}
   </p>
   <ng-template pTemplate="footer">
-      <div class="flex gap-3 mt-1">
-          <p-button label="Entrar" outlined class="w-full" styleClass="w-full" [routerLink]="['/materia', materia.id]" />
-          <p-button icon="pi pi-ellipsis-v" (onClick)="menu.toggle($event)" outlined severity="secondary"/>
-          <p-button icon="pi pi-share-alt" severity="primary"/>
-      </div>
+    <div class="flex gap-3 mt-1">
+      <p-button label="Entrar" outlined class="w-full" styleClass="w-full" [routerLink]="['/app/materia', materia.id]" />
+      <p-button icon="pi pi-ellipsis-v" (onClick)="menu.toggle($event)" outlined severity="secondary" />
+      <p-button icon="pi pi-share-alt" severity="primary" />
+    </div>
   </ng-template>
 </p-card>
 
