@@ -6,6 +6,10 @@ const routes: Routes = [
   {
     path: '',
     component: ContenidoPageComponent
+  },
+  {
+    path: 'tema/:temaId',
+    component: ContenidoPageComponent
   }
 ];
 

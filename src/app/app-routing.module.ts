@@ -22,9 +22,15 @@ const routes: Routes = [
     canActivate: [isAuthenticatedGuard],
     component: LayoutPageComponent,
     children: [
-      { path: '', redirectTo: 'materias', pathMatch: 'full' }, // Redirect to /app/materia
-      { path: 'materias', component: MateriasPageComponent },
-      { path: 'compartidos', component: CompartidosPageComponent },
+      { path: '', redirectTo: 'materia', pathMatch: 'full' }, // Redirect to /app/materia
+      {
+        path: 'materia',
+        children: [
+          { path: '',  component: MateriasPageComponent },
+          { path: ':materiaId', loadChildren: () => import('./contenido/contenido.module').then(m => m.ContenidoModule) }
+        ]
+      },
+      { path: 'compartido', component: CompartidosPageComponent },
     ]
   },
   {
