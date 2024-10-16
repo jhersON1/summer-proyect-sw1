@@ -1,37 +1,35 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { MateriasRoutingModule } from './materias-routing.module';
-import { MateriasListPageComponent } from './materias-list-page/materias-list-page.component';
+import { MateriasPageComponent } from './pages/materias-page/materias-page.component';
 import { NewMateriaComponent } from './components/new-materia/new-materia.component';
 import { CardMateriaComponent } from './components/card-materia/card-materia.component';
+import { CompartidosPageComponent } from './pages/compartidos-page/compartidos-page.component';
 
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { TabMenuModule } from 'primeng/tabmenu';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MenuModule } from 'primeng/menu';
+
 import { ToastModule } from 'primeng/toast';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { EditMateriaComponent } from './components/edit-materia/edit-materia.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
   declarations: [
+    MateriasPageComponent,
     CardMateriaComponent,
-    MateriasListPageComponent,
     NewMateriaComponent,
-    EditMateriaComponent
+    CompartidosPageComponent
   ],
   imports: [
     CommonModule,
-    MateriasRoutingModule,
     ReactiveFormsModule,
     FormsModule,
 
@@ -44,8 +42,7 @@ import { EditMateriaComponent } from './components/edit-materia/edit-materia.com
     AvatarModule,
     AvatarGroupModule,
     InputTextModule,
-    InputTextareaModule,
-    ConfirmDialogModule
+    InputTextareaModule
   ],
   providers:[
     MessageService,
