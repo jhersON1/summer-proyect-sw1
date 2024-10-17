@@ -4,7 +4,7 @@ import { Tema } from '../../interfaces/tema.interface';
 import { TemaService } from '../../services/tema.service';
 import { switchMap } from 'rxjs';
 import { Table, TableRowSelectEvent, TableRowUnSelectEvent } from 'primeng/table';
-import { SortEvent } from 'primeng/api';
+import { MessageService, SortEvent } from 'primeng/api';
 
 @Component({
   templateUrl: './contenido-page.component.html',
@@ -24,10 +24,17 @@ export class ContenidoPageComponent implements OnInit {
   private lastClickTime: number = 0;
   private readonly doubleClickThreshold: number = 500;  //500 milisegundos
 
+  public tema: Tema = {
+    id: 0,
+    nombre: '',
+  };
+  public temaDialog: boolean = false;
+
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private temaService: TemaService
+    private temaService: TemaService,
+    private messageService: MessageService
   ) { }
 
   ngOnInit(): void {
@@ -60,6 +67,54 @@ export class ContenidoPageComponent implements OnInit {
     }
   }
 
+  editTema(tema: Tema) {
+    this.tema = { ...tema };
+    this.temaDialog = true;
+  }
+
+  saveTema() {
+    //TODO: Validacion de nombre de Tema no duplicado la base tiene a nombre de tema unico
+    if (!this.tema.nombre.trim()) return;
+
+    const temaId =  this.tema.id;
+    if (temaId) {
+      this.temaService.updateTema(this.tema)
+        .subscribe( tema => {
+          this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Tema Actualizado', life: 3000 });
+          this.temas[this.findIndexById(temaId)] = this.tema;
+        });
+    } else {
+      // this.product.image = 'product-placeholder.svg';
+      // this.products.push(this.product);
+      // this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+    }
+
+    this.temas = [...this.temas];
+
+    this.temaDialog = false;
+  }
+
+  private findIndexById(id: number): number {
+    let index = -1;
+    for (let i = 0; i < this.temas.length; i++) {
+      if (this.temas[i].id === id) {
+        index = i;
+        break;
+      }
+    }
+
+    return index;
+  }
+
+  hideDialog() {
+    this.temaDialog = false;
+    // this.submitted = false;
+  }
+
+  deleteTema(tema: Tema) {
+
+  }
+
   customSort(event: SortEvent) {
     if (this.isSorted == null || this.isSorted === undefined) {
       this.isSorted = true;
@@ -75,7 +130,7 @@ export class ContenidoPageComponent implements OnInit {
   }
 
   private sortTableData(event: SortEvent) {
-    const field =  event.field!;
+    const field = event.field!;
     event.data!.sort((data1, data2) => {
       let value1 = data1[field];
       let value2 = data2[field];
@@ -100,6 +155,6 @@ export class ContenidoPageComponent implements OnInit {
     if ((currentTime - this.lastClickTime) > this.doubleClickThreshold) return;
 
     const temaId = event.data.id;
-    this.router.navigateByUrl(`/app/materia/${ this.materiaId }/tema/${ temaId }`);
+    this.router.navigateByUrl(`/app/materia/${this.materiaId}/tema/${temaId}`);
   }
 }

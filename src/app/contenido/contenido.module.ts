@@ -6,6 +6,13 @@ import { ContenidoPageComponent } from './pages/contenido-page/contenido-page.co
 
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule } from '@angular/forms';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @NgModule({
   declarations: [
@@ -14,9 +21,18 @@ import { TableModule } from 'primeng/table';
   imports: [
     CommonModule,
     ContenidoRoutingModule,
+    FormsModule,
 
     BreadcrumbModule,
     TableModule,
+    ButtonModule,
+    DialogModule,
+    ConfirmDialogModule,
+    InputTextModule,
+    ToastModule,
+  ],
+  providers: [
+    MessageService
   ]
 })
 export class ContenidoModule { }
