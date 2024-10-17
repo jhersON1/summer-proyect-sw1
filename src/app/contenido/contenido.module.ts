@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { ContenidoRoutingModule } from './contenido-routing.module';
 import { ContenidoPageComponent } from './pages/contenido-page/contenido-page.component';
 
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { TableModule } from 'primeng/table';
 
 @NgModule({
   declarations: [
@@ -11,7 +13,10 @@ import { ContenidoPageComponent } from './pages/contenido-page/contenido-page.co
   ],
   imports: [
     CommonModule,
-    ContenidoRoutingModule
+    ContenidoRoutingModule,
+
+    BreadcrumbModule,
+    TableModule,
   ]
 })
 export class ContenidoModule { }
