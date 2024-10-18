@@ -1,3 +1,4 @@
+import { Materia } from '../../home/interfaces/materia.interface';
 import { Tema } from './tema.interface';
 
 export interface SubtemasResponse {
@@ -5,5 +6,5 @@ export interface SubtemasResponse {
   nombre:    string;
   subTemas:  Tema[];
   //temaPadre: null;
-  // materia:   Materia;
+  materia: Materia;
 }

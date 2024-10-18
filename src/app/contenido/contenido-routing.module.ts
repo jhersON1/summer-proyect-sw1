@@ -10,8 +10,12 @@ const routes: Routes = [
   },
   {
     path: 'tema/:temaId',
-    //canActivate: [temaExistsGuard],
+    canActivate: [temaExistsGuard],
     component: ContenidoPageComponent
+  },
+  {
+    path: '**',
+    redirectTo: '',
   }
 ];
 

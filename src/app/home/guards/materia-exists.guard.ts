@@ -7,9 +7,10 @@ export const materiaExistsGuard: CanActivateFn = (route, state) => {
   const materiaService = inject(MateriaService);
   const router = inject(Router);
   const materiaId = +(route.paramMap.get('materiaId') ?? '');
-  console.log(typeof materiaId, materiaId);
+  const location = window.history;
   if (!materiaId || typeof materiaId !== 'number' || isNaN(materiaId)) {
-    router.navigateByUrl('/app/materia');
+    //router.navigateByUrl('/app/materia');
+    location.back();
     return false;
   };
 
@@ -17,7 +18,8 @@ export const materiaExistsGuard: CanActivateFn = (route, state) => {
     // Si el servicio devuelve un resultado, retorna true (permite la activación)
     map(materia => {
       if (!materia) {
-        router.navigateByUrl('/app/materia');
+        location.back();
+        //router.navigateByUrl('/app/materia');
         return false;
       }
 
@@ -25,7 +27,8 @@ export const materiaExistsGuard: CanActivateFn = (route, state) => {
     }),
     // En caso de error (como que el ID no exista), redirige y retorna false
     catchError(() => {
-      router.navigateByUrl('/app/materia');
+      location.back();
+      //router.navigateByUrl('/app/materia');
       return of(false);
     })
   );
