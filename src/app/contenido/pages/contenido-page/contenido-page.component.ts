@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Tema } from '../../interfaces/tema.interface';
 import { TemaService } from '../../services/tema.service';
@@ -80,10 +80,6 @@ export class ContenidoPageComponent implements OnInit {
   //   "temaPadreId": 9
   // }
 
-  //TODO: Que no se pueda entrar a una ruta asi: app/materia/2/tema/777
-  //todo: si no existe un tema con id 777 y su materiaId no sea 2
-  //todo: que redireccione a app/materia/2
-
   saveTema() {
     //TODO: Validacion de nombre de Tema no duplicado la base tiene a nombre de tema unico
     if (!this.tema.nombre.trim()) return;
@@ -96,8 +92,6 @@ export class ContenidoPageComponent implements OnInit {
       // this.products.push(this.product);
       // this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
     }
-
-    //this.temas = [...this.temas];
     this.temaDialog = false;
   }
 
@@ -106,6 +100,7 @@ export class ContenidoPageComponent implements OnInit {
       .subscribe(tema => {
         this.temas[this.findIndexById(temaId)] = this.tema;
         this.initialValue = [...this.temas];
+        this.temas = [...this.temas];
         this.messageService.add({ severity: 'success', summary: 'Actualización realizada', detail: 'Tema actualizado correctamente', life: 3000 });
       });
   }
@@ -188,5 +183,10 @@ export class ContenidoPageComponent implements OnInit {
 
     const temaId = event.data.id;
     this.router.navigateByUrl(`/app/materia/${this.materiaId}/tema/${temaId}`);
+  }
+
+  applyFilter(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.dt.filterGlobal(inputElement.value, 'contains');
   }
 }
