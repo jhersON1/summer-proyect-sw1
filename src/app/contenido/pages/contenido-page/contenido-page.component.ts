@@ -4,7 +4,7 @@ import { Tema } from '../../interfaces/tema.interface';
 import { TemaService } from '../../services/tema.service';
 import { switchMap } from 'rxjs';
 import { Table, TableRowSelectEvent, TableRowUnSelectEvent } from 'primeng/table';
-import { MessageService, SortEvent } from 'primeng/api';
+import { ConfirmationService, MessageService, SortEvent } from 'primeng/api';
 
 @Component({
   templateUrl: './contenido-page.component.html',
@@ -34,7 +34,8 @@ export class ContenidoPageComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private temaService: TemaService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
   ) { }
 
   ngOnInit(): void {
@@ -72,26 +73,41 @@ export class ContenidoPageComponent implements OnInit {
     this.temaDialog = true;
   }
 
+  // {
+  //   "id": 123,
+  //   "nombre": "gaaaa",
+  //   "materiaId": 2,
+  //   "temaPadreId": 9
+  // }
+
+  //TODO: Que no se pueda entrar a una ruta asi: app/materia/2/tema/777
+  //todo: si no existe un tema con id 777 y su materiaId no sea 2
+  //todo: que redireccione a app/materia/2
+
   saveTema() {
     //TODO: Validacion de nombre de Tema no duplicado la base tiene a nombre de tema unico
     if (!this.tema.nombre.trim()) return;
 
-    const temaId =  this.tema.id;
+    const temaId = this.tema.id;
     if (temaId) {
-      this.temaService.updateTema(this.tema)
-        .subscribe( tema => {
-          this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Tema Actualizado', life: 3000 });
-          this.temas[this.findIndexById(temaId)] = this.tema;
-        });
+      this.updateTema(temaId);
     } else {
       // this.product.image = 'product-placeholder.svg';
       // this.products.push(this.product);
       // this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
     }
 
-    this.temas = [...this.temas];
-
+    //this.temas = [...this.temas];
     this.temaDialog = false;
+  }
+
+  private updateTema(temaId: number) {
+    this.temaService.updateTema(this.tema)
+      .subscribe(tema => {
+        this.temas[this.findIndexById(temaId)] = this.tema;
+        this.initialValue = [...this.temas];
+        this.messageService.add({ severity: 'success', summary: 'Actualización realizada', detail: 'Tema actualizado correctamente', life: 3000 });
+      });
   }
 
   private findIndexById(id: number): number {
@@ -112,7 +128,23 @@ export class ContenidoPageComponent implements OnInit {
   }
 
   deleteTema(tema: Tema) {
-
+    this.confirmationService.confirm({
+      message: `¿Esta seguro de eliminar el tema ${tema.nombre} y todo su contenido ?`,
+      header: 'Eliminar tema',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.temaService.deleteTemaById(tema.id)
+          .subscribe( temaDeleted => {
+            if  (!temaDeleted) {
+              return this.messageService.add({ severity: 'error', summary: `Error: No  se pudo eliminar el tema ${tema.nombre}` , detail: 'Primero debe eliminar sus apuntes', life: 3000 });
+            }
+            console.log('Se elimina');
+            this.temas = this.temas.filter((t) => t.id !== tema.id);
+            this.initialValue = [...this.temas];
+            this.messageService.add({ severity: 'success', summary: 'Eliminación realizada', detail: `El tema ${tema.nombre} fue eliminado`, life: 3000 });
+          });
+      }
+    });
   }
 
   customSort(event: SortEvent) {
