@@ -13,6 +13,7 @@ import { ConfirmationService, MessageService, SortEvent } from 'primeng/api';
 export class ContenidoPageComponent implements OnInit {
 
   private materiaId: string | null = null;
+  public temaPadreId?: number;
 
   public temas: Tema[] = [];
 
@@ -28,6 +29,9 @@ export class ContenidoPageComponent implements OnInit {
     id: 0,
     nombre: '',
   };
+
+  // public tema!: Tema;
+
   public temaDialog: boolean = false;
 
   constructor(
@@ -58,6 +62,7 @@ export class ContenidoPageComponent implements OnInit {
       this.activatedRoute.params
         .pipe(
           switchMap(({ temaId }) => {
+            this.temaPadreId = +temaId;
             return this.temaService.getTemaContentById(temaId);
           })
         ).subscribe(({ subTemas }) => {
@@ -73,6 +78,21 @@ export class ContenidoPageComponent implements OnInit {
     this.temaDialog = true;
   }
 
+  createTema() {
+    this.tema = {
+      id: -1,
+      nombre: '',
+      materiaId: +this.materiaId!,
+      temaPadreId: this.temaPadreId
+    };
+    // this.submitted = false;
+    this.temaDialog = true;
+  }
+
+  createApunte() {
+
+  }
+
   // {
   //   "id": 123,
   //   "nombre": "gaaaa",
@@ -85,12 +105,10 @@ export class ContenidoPageComponent implements OnInit {
     if (!this.tema.nombre.trim()) return;
 
     const temaId = this.tema.id;
-    if (temaId) {
+    if (temaId && temaId !== -1) {
       this.updateTema(temaId);
     } else {
-      // this.product.image = 'product-placeholder.svg';
-      // this.products.push(this.product);
-      // this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+      this.storeTema();
     }
     this.temaDialog = false;
   }
@@ -102,6 +120,15 @@ export class ContenidoPageComponent implements OnInit {
         this.initialValue = [...this.temas];
         this.temas = [...this.temas];
         this.messageService.add({ severity: 'success', summary: 'Actualización realizada', detail: 'Tema actualizado correctamente', life: 3000 });
+      });
+  }
+
+  private storeTema() {
+    this.temaService.addTema(this.tema)
+      .subscribe(tema => {
+        this.tema = { ...tema }
+        this.temas.push(this.tema);
+        this.messageService.add({ severity: 'success', summary: 'Nuevo tema', detail: 'Tema creado correctamente', life: 3000 });
       });
   }
 
@@ -133,7 +160,6 @@ export class ContenidoPageComponent implements OnInit {
             if  (!temaDeleted) {
               return this.messageService.add({ severity: 'error', summary: `Error: No  se pudo eliminar el tema ${tema.nombre}` , detail: 'Primero debe eliminar sus apuntes', life: 3000 });
             }
-            console.log('Se elimina');
             this.temas = this.temas.filter((t) => t.id !== tema.id);
             this.initialValue = [...this.temas];
             this.messageService.add({ severity: 'success', summary: 'Eliminación realizada', detail: `El tema ${tema.nombre} fue eliminado`, life: 3000 });
