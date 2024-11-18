@@ -7,6 +7,7 @@ import { Table, TableRowSelectEvent, TableRowUnSelectEvent } from 'primeng/table
 import { ConfirmationService, MessageService, SortEvent } from 'primeng/api';
 import { Apunte } from '../../interfaces/apunte.interface';
 import { ApunteService } from '../../services/apunte.service';
+import { MateriaService } from '../../../home/services/materia.service';
 
 @Component({
   templateUrl: './contenido-page.component.html',
@@ -39,29 +40,33 @@ export class ContenidoPageComponent implements OnInit {
   public temaDialog: boolean = false;
   public apunteDialog: boolean = false;
 
+  public title: string = '';
+
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private temaService: TemaService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private apunteService: ApunteService
+    private apunteService: ApunteService,
+    private materiaService: MateriaService
   ) { }
 
   ngOnInit(): void {
 
     this.materiaId = this.activatedRoute.snapshot.paramMap.get('materiaId');
-    // this.activatedRoute.paramMap.subscribe(params => {
-    //   this.materiaId = params.get('materiaId');
-    // });
 
     this.apunte.materiaId = +this.materiaId!;
 
     if (!this.router.url.includes('tema')) {
+      this.materiaService.getMateriaById(+this.materiaId!)
+        .subscribe(materia => {
+        this.title = materia.nombre
+        });
+
       this.temaService.getMateriaContentById(+this.materiaId!)
         .subscribe(temas => {
           this.elements = temas;
-          //this.temas = temas;
           this.initialValue = [...temas];
           return;
         });
@@ -79,6 +84,7 @@ export class ContenidoPageComponent implements OnInit {
             });
           })
         ).subscribe(({ subtemasResponse, apuntes }) => {
+          this.title = subtemasResponse.nombre;
           const temas = subtemasResponse.subTemas;
           this.elements = [...temas, ...apuntes];
           console.log(this.elements);
