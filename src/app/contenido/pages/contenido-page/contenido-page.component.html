@@ -40,6 +40,9 @@
           </span>
         </td>
         <td class="text-right">
+          <p-button *ngIf="isApunte(element)" label="Invitar gente" class="md:mr-2" [rounded]="true" [outlined]="true"
+            (onClick)="invitePeople(element)" />
+
           <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" severity="success"
             (onClick)="editElement(element)" />
 
@@ -76,6 +79,18 @@
     <ng-template pTemplate="footer">
       <p-button label="Cancelar" [text]="true" severity="secondary" (onClick)="hideApunteDialog()" />
       <p-button label="Guardar" [outlined]="true" severity="success" (onClick)="saveApunte()" />
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog [(visible)]="invitationDialog" header="Invitar personas" [modal]="true" [style]="{ width: '300px' }">
+    <label for="guest" class="font-semibold block mb-2">Email del invitado</label>
+    <input pInputText [(ngModel)]="guestEmail" id="guest" class="block w-full" />
+    <span *ngIf="!guestEmail" class="p-error font-italic block mt-2">
+      El email del invitado es requerido.
+    </span>
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" [text]="true" severity="secondary" (onClick)="hideInvitationDialog()" />
+      <p-button label="Enviar" [outlined]="true" severity="success" (onClick)="sendInvitation()" />
     </ng-template>
   </p-dialog>
 

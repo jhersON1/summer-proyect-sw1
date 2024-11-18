@@ -39,8 +39,10 @@ export class ContenidoPageComponent implements OnInit {
 
   public temaDialog: boolean = false;
   public apunteDialog: boolean = false;
+  public invitationDialog: boolean = false;
 
   public title: string = '';
+  public guestEmail: string = '';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -87,7 +89,6 @@ export class ContenidoPageComponent implements OnInit {
           this.title = subtemasResponse.nombre;
           const temas = subtemasResponse.subTemas;
           this.elements = [...temas, ...apuntes];
-          console.log(this.elements);
           this.initialValue = [...this.elements];
           return;
         });
@@ -157,6 +158,13 @@ export class ContenidoPageComponent implements OnInit {
     this.apunteDialog = false;
   }
 
+  sendInvitation() {
+    if (!this.guestEmail.trim()) return;
+    console.log(`ENVIAR INVITACION AL APUNTE ${this.apunte.titulo} al usuario ${this.guestEmail}`);
+    this.messageService.add({ severity: 'success', summary: 'Invitación enviada', detail: `Se invito a ${this.guestEmail} al apunte ${this.apunte.titulo}`, life: 3000 });
+    this.invitationDialog = false;
+  }
+
   private updateTema(temaId: number) {
     this.temaService.updateTema(this.tema)
       .subscribe(tema => {
@@ -217,6 +225,10 @@ export class ContenidoPageComponent implements OnInit {
 
   hideApunteDialog() {
     this.apunteDialog = false;
+  }
+
+  hideInvitationDialog() {
+    this.invitationDialog = false;
   }
 
   deleteElement(element: Tema | Apunte) {
@@ -324,5 +336,11 @@ export class ContenidoPageComponent implements OnInit {
 
   isApunte(element: Tema | Apunte): element is Apunte {
     return (element as Apunte).titulo !== undefined;
+  }
+
+  invitePeople(apunte: Apunte) {
+    this.apunte = { ...apunte };
+    this.guestEmail = '';
+    this.invitationDialog = true;
   }
 }
