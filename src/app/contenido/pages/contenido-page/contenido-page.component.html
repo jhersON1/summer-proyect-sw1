@@ -14,15 +14,15 @@
         <p-inputIcon>
           <i class="pi pi-search"></i>
         </p-inputIcon>
-        <input #inputSearch pInputText type="text" placeholder="Buscar tema" [style]="{width: '100%'}"
+        <input #inputSearch pInputText type="text" [placeholder]="[(temaPadreId) ? 'Buscar tema o apunte': 'Buscar tema']" [style]="{width: '100%'}"
           (input)="applyFilter($event)" />
       </p-iconField>
     </div>
   </div>
 
-  <p-table #dt [value]="temas" selectionMode="single" (sortFunction)="customSort($event)"
+  <p-table #dt [value]="elements" selectionMode="single" (sortFunction)="customSort($event)"
     (onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect($event)" [customSort]="true"
-    [globalFilterFields]="['nombre']">
+    [globalFilterFields]="['nombre','titulo']">
     <ng-template pTemplate="header">
       <tr class="text-lg">
         <th pSortableColumn="nombre">
@@ -31,26 +31,26 @@
         <th></th>
       </tr>
     </ng-template>
-    <ng-template pTemplate="body" let-tema>
-      <tr [pSelectableRow]="tema" class="text-lg">
+    <ng-template pTemplate="body" let-element>
+      <tr [pSelectableRow]="element" class="text-lg">
         <td>
-          <i class="pi pi-book vertical-align-middle"></i>
+          <i [ngClass]="[isTema(element) ? 'pi pi-book' : 'pi pi-file-edit']"  class="vertical-align-middle"></i>
           <span class="ml-1 vertical-align-middle">
-            {{ tema.nombre }}
+            {{ (element.nombre) ? element.nombre : element.titulo }}
           </span>
         </td>
         <td class="text-right">
           <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" severity="success"
-            (onClick)="editTema(tema)" />
+            (onClick)="editElement(element)" />
 
           <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
-            (onClick)="deleteTema(tema)" />
+            (onClick)="deleteElement(element)" />
         </td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="5">No se encontrarón temas con ese nombre.</td>
+        <td colspan="5">No se encontraron temas{{ temaPadreId ? ' o apuntes' : '' }} con ese nombre.</td>
       </tr>
     </ng-template>
   </p-table>
@@ -62,8 +62,20 @@
       El nombre es requerido.
     </span>
     <ng-template pTemplate="footer">
-      <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="hideDialog()" />
+      <p-button label="Cancelar" [text]="true" severity="secondary" (onClick)="hideTemaDialog()" />
       <p-button label="Guardar" [outlined]="true" severity="success" (onClick)="saveTema()" />
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog [(visible)]="apunteDialog" [header]="(apunte.id != -1) ? 'Editar Apunte' : 'Crear Apunte' " [modal]="true" [style]="{ width: '300px' }">
+    <label for="titulo" class="font-semibold block mb-2">Titulo</label>
+    <input pInputText [(ngModel)]="apunte.titulo" id="titulo" class="block w-full" />
+    <span *ngIf="!apunte.titulo" class="p-error font-italic block mt-2">
+      El titulo es requerido.
+    </span>
+    <ng-template pTemplate="footer">
+      <p-button label="Cancelar" [text]="true" severity="secondary" (onClick)="hideApunteDialog()" />
+      <p-button label="Guardar" [outlined]="true" severity="success" (onClick)="saveApunte()" />
     </ng-template>
   </p-dialog>
 
