@@ -2,16 +2,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApuntesRoutingModule } from './apuntes-routing.module';
-import { EditorPageComponent } from './pages/editor-page/editor-page.component';
-import { EditorComponent } from "./components/editor/editor.component";
 
-import { QuillEditorComponent } from 'ngx-quill';
+import { ApuntePageComponent } from './pages/apunte-page/apunte-page.component';
+import { EditorComponent } from "./components/editor/editor.component";
 
 import { MenubarModule } from 'primeng/menubar';
 
+import { QuillEditorComponent } from 'ngx-quill';
+
+
 @NgModule({
   declarations: [
-    EditorPageComponent,
+    ApuntePageComponent,
     EditorComponent
   ],
   imports: [

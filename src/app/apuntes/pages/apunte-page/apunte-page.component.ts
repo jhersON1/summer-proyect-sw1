@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 
 @Component({
-  selector: 'app-editor-page',
-  templateUrl: './editor-page.component.html',
-  styleUrl: './editor-page.component.scss'
+  selector: 'app-apunte-page',
+  templateUrl: './apunte-page.component.html',
+  styleUrl: './apunte-page.component.scss'
 })
-export class EditorPageComponent implements OnInit {
+export class ApuntePageComponent implements OnInit {
 
   tamanoPapel: string = 'letter';
 
