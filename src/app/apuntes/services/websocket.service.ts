@@ -120,11 +120,19 @@ export class WebsocketService {
   //   this.socket.emit('editorChanges', { sessionId, userEmail, delta });
   // }
 
-  sendChanges(delta: any): void {
-    console.log('[WebsocketService] Sending changes:', delta);
-    this.socket.emit('editorChanges', { delta });
-  }
+  sendChanges(sessionId: string, userEmail: string, delta: any): void {
+    console.log('[WebsocketService] Sending changes:', {
+      sessionId,
+      userEmail,
+      delta
+    });
 
+    this.socket.emit('editorChanges', {
+      sessionId,
+      userEmail,
+      delta
+    });
+  }
   onEditorChanges(): Observable<any> {
     console.log('[WebsocketService] Setting up editor changes listener');
     const changes$ = new Subject<any>();
