@@ -1,8 +1,13 @@
-<h3 id="focusBlur">Default editor with height of 200px</h3>
-<p>focused: {{ focused }}, blurred: {{ blurred }}</p>
-<quill-editor (onFocus)="focus($event)"
-  (onNativeFocus)="nativeFocus($event)" (onEditorChanged)="changedEditor($event)" (onBlur)="blur($event)"
-  (onNativeBlur)="nativeBlur($event)" (onEditorCreated)="created($event)"
+
+<button (click)="testUpdateContents({ ops: [{ insert: 'Hello World!\n' }] })">
+  Apply Test Delta
+</button>
+<!-- con #estamos haciendo una referencia a ese elemento del dom -->
+<quill-editor
+  #editor
+  (onContentChanged)="changedContent($event)"
+  (onEditorCreated)="created($event)"
+
   [placeholder]="''"
   class="{{tamanoPapel}}"
   ></quill-editor>

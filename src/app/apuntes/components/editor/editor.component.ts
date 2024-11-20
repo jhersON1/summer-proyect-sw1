@@ -1,56 +1,52 @@
-import { Component, Input } from '@angular/core';
-import { EditorChangeContent, EditorChangeSelection } from 'ngx-quill';
-import { MenuItem } from 'primeng/api';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { QuillEditorComponent } from 'ngx-quill';
 import Quill from 'quill';
-import Block from 'quill/blots/block';
-
-Block.tagName = "DIV";
-Quill.register(Block, true);
+import { EditorService } from '../../services/editor.service';
 
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.scss',
 })
-
-export class EditorComponent {
-  blurred = false
-  focused = false
-
+export class EditorComponent implements OnInit {
   @Input() tamanoPapel!: string;
+  @ViewChild('editor', { static: true }) quillEditor!: QuillEditorComponent;
 
+  private quillInstance!: Quill;
 
-  created(event: Quill | any) {
-    // tslint:disable-next-line:no-console
-    console.log('editor-created', event)
+  constructor(private socket: EditorService) {}
+
+  created(event: Quill) {
+    this.quillInstance = event;
+    console.log('editor-created', event);
   }
 
-  changedEditor(event: EditorChangeContent | EditorChangeSelection | any) {
-    // tslint:disable-next-line:no-console
-    console.log('editor-change', event)
+  changedContent(event: any) {
+    console.log('content-change', event);
+    const source: string = event.source;
+    const delta: any = event.delta;
+    if (source !== 'user') return;
+
+    this.socket.sendChanges(delta);
   }
 
-  focus($event: any) {
-    // tslint:disable-next-line:no-console
-    console.log('focus', $event)
-    this.focused = true
-    this.blurred = false
+  testUpdateContents(delta: any) {
+    if (this.quillInstance) {
+      this.quillInstance.updateContents(delta, 'api');
+      console.log('Delta applied:', delta);
+    } else {
+      console.error('Quill instance not initialized.');
+    }
   }
 
-  nativeFocus($event: any) {
-    // tslint:disable-next-line:no-console
-    console.log('native-focus', $event)
+  ngOnInit(): void {
+    this.socket.getChanges().subscribe((delta: any) => {
+      if (this.quillInstance) {
+        this.quillInstance.updateContents(delta, 'api');
+        console.log('Changes applied:', delta);
+      } else {
+        console.error('Quill instance not initialized.');
+      }
+    });
   }
-
-  blur($event: any) {
-    // tslint:disable-next-line:no-console
-    console.log('blur', $event)
-    this.focused = false
-    this.blurred = true
-  }
-  nativeBlur($event: any) {
-    // tslint:disable-next-line:no-console
-    console.log('native-blur', $event)
-  }
-
 }
