@@ -8,6 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { HomeModule } from './home/home.module';
 import { LayoutModule } from './layout/layout.module';
+// @ts-ignore
 import { QuillModule } from 'ngx-quill';
 
 @NgModule({

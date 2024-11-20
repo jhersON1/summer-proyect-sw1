@@ -1,0 +1,261 @@
+<!--@if (!showUrlSection) {-->
+<!--  <form [formGroup]="invitationForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-4">-->
+<!--    <p-messages></p-messages>-->
+
+<!--    &lt;!&ndash; Lista de invitaciones &ndash;&gt;-->
+<!--    <div formArrayName="invitations" class="flex flex-column gap-3">-->
+<!--      @for (invitation of invitations.controls; track $index) {-->
+<!--        <div [formGroupName]="$index" class="flex align-items-center gap-2">-->
+<!--          <span class="p-float-label flex-grow-1">-->
+<!--            <input-->
+<!--              pInputText-->
+<!--              id="email_{{$index}}"-->
+<!--              formControlName="email"-->
+<!--              class="w-full"-->
+<!--              [ngClass]="{'ng-invalid ng-dirty': fieldHasErrors($index)}"-->
+<!--            >-->
+<!--            <label for="email_{{$index}}">Email del colaborador</label>-->
+<!--          </span>-->
+
+<!--          @if (invitations.length > 1) {-->
+<!--            <button-->
+<!--              pButton-->
+<!--              type="button"-->
+<!--              icon="pi pi-times"-->
+<!--              class="p-button-danger p-button-rounded"-->
+<!--              (click)="removeInvitation($index)"-->
+<!--            ></button>-->
+<!--          }-->
+<!--        </div>-->
+
+<!--        @if (fieldHasErrors($index)) {-->
+<!--          <small class="p-error">{{ getFieldError($index) }}</small>-->
+<!--        }-->
+<!--      }-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Botón para añadir más invitaciones &ndash;&gt;-->
+<!--    <div class="flex justify-content-end">-->
+<!--      <button-->
+<!--        pButton-->
+<!--        type="button"-->
+<!--        label="Añadir otro colaborador"-->
+<!--        icon="pi pi-plus"-->
+<!--        (click)="addInvitation()"-->
+<!--        class="p-button-secondary"-->
+<!--      ></button>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Permisos &ndash;&gt;-->
+<!--    <div class="flex flex-column gap-2">-->
+<!--      <h3>Permisos de colaboradores</h3>-->
+<!--      <div class="flex align-items-center gap-2">-->
+<!--        <p-checkbox-->
+<!--          formControlName="allowEditing"-->
+<!--          [binary]="true"-->
+<!--          inputId="allowEditing">-->
+<!--        </p-checkbox>-->
+<!--        <label for="allowEditing">Permitir edición</label>-->
+<!--      </div>-->
+
+<!--      <div class="flex align-items-center gap-2">-->
+<!--        <p-checkbox-->
+<!--          formControlName="allowInviting"-->
+<!--          [binary]="true"-->
+<!--          inputId="allowInviting">-->
+<!--        </p-checkbox>-->
+<!--        <label for="allowInviting">Permitir invitar a otros</label>-->
+<!--      </div>-->
+
+<!--      <div class="flex align-items-center gap-2">-->
+<!--        <p-checkbox-->
+<!--          formControlName="allowDeleting"-->
+<!--          [binary]="true"-->
+<!--          inputId="allowDeleting">-->
+<!--        </p-checkbox>-->
+<!--        <label for="allowDeleting">Permitir eliminar contenido</label>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Botones de acción &ndash;&gt;-->
+<!--    <div class="flex justify-content-end gap-2">-->
+<!--      <button-->
+<!--        pButton-->
+<!--        type="button"-->
+<!--        label="Cancelar"-->
+<!--        class="p-button-secondary"-->
+<!--        (click)="close()"-->
+<!--      ></button>-->
+<!--      <button-->
+<!--        pButton-->
+<!--        type="submit"-->
+<!--        label="Invitar"-->
+<!--        icon="pi pi-send"-->
+<!--      ></button>-->
+<!--    </div>-->
+<!--  </form>-->
+<!--} @else {-->
+<!--  <div class="flex flex-column gap-4">-->
+<!--    <p-messages></p-messages>-->
+
+<!--    <div class="flex flex-column gap-2">-->
+<!--      <h3>¡Invitación creada!</h3>-->
+<!--      <p>Comparte este enlace con tus colaboradores:</p>-->
+<!--      <div class="flex gap-2">-->
+<!--        <input-->
+<!--          pInputText-->
+<!--          [value]="collaborationUrl"-->
+<!--          readonly-->
+<!--          class="flex-grow-1"-->
+<!--        >-->
+<!--        <button-->
+<!--          pButton-->
+<!--          icon="pi pi-copy"-->
+<!--          (click)="copyUrl()"-->
+<!--          pTooltip="Copiar URL"-->
+<!--        ></button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div class="flex justify-content-end">-->
+<!--      <button-->
+<!--        pButton-->
+<!--        label="Cerrar"-->
+<!--        (click)="close()"-->
+<!--      ></button>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--}-->
+
+
+
+@if (!showUrlSection) {
+  <form [formGroup]="invitationForm" (ngSubmit)="onSubmit()" class="flex flex-column gap-4">
+    <p-messages></p-messages>
+
+    <!-- Lista de invitaciones -->
+    <div formArrayName="invitations" class="flex flex-column gap-3">
+      @for (invitation of invitations.controls; track $index) {
+        <div [formGroupName]="$index" class="flex align-items-center gap-2">
+          <span class="p-float-label flex-grow-1">
+            <input
+              pInputText
+              id="email_{{$index}}"
+              formControlName="email"
+              class="w-full"
+              [ngClass]="{'ng-invalid ng-dirty': fieldHasErrors($index)}"
+            >
+            <label for="email_{{$index}}">Email del colaborador</label>
+          </span>
+
+          @if (invitations.length > 1) {
+            <button
+              pButton
+              type="button"
+              icon="pi pi-times"
+              class="p-button-danger p-button-rounded"
+              (click)="removeInvitation($index)"
+            ></button>
+          }
+        </div>
+
+        @if (fieldHasErrors($index)) {
+          <small class="p-error">{{ getFieldError($index) }}</small>
+        }
+      }
+    </div>
+
+    <!-- Botón para añadir más invitaciones -->
+    <div class="flex justify-content-end">
+      <button
+        pButton
+        type="button"
+        label="Añadir otro colaborador"
+        icon="pi pi-plus"
+        (click)="addInvitation()"
+        class="p-button-secondary"
+      ></button>
+    </div>
+
+    <!-- Permisos -->
+    <div class="flex flex-column gap-2">
+      <h3>Permisos de colaboradores</h3>
+      <div class="flex align-items-center gap-2">
+        <p-checkbox
+          formControlName="allowEditing"
+          [binary]="true"
+          inputId="allowEditing">
+        </p-checkbox>
+        <label for="allowEditing">Permitir edición</label>
+      </div>
+
+      <div class="flex align-items-center gap-2">
+        <p-checkbox
+          formControlName="allowInviting"
+          [binary]="true"
+          inputId="allowInviting">
+        </p-checkbox>
+        <label for="allowInviting">Permitir invitar a otros</label>
+      </div>
+
+      <div class="flex align-items-center gap-2">
+        <p-checkbox
+          formControlName="allowDeleting"
+          [binary]="true"
+          inputId="allowDeleting">
+        </p-checkbox>
+        <label for="allowDeleting">Permitir eliminar contenido</label>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex justify-content-end gap-2">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        class="p-button-secondary"
+        (click)="close()"
+      ></button>
+      <button
+        pButton
+        type="submit"
+        label="Invitar"
+        icon="pi pi-send"
+        [loading]="isProcessing"
+      ></button>
+    </div>
+  </form>
+} @else {
+  <div class="flex flex-column gap-4">
+    <p-messages></p-messages>
+
+    <div class="flex flex-column gap-2">
+      <h3>¡Invitación creada!</h3>
+      <p>Comparte este enlace con tus colaboradores:</p>
+      <div class="flex gap-2">
+        <input
+          pInputText
+          [value]="collaborationUrl"
+          readonly
+          class="flex-grow-1"
+        >
+        <button
+          pButton
+          icon="pi pi-copy"
+          (click)="copyUrl()"
+          pTooltip="Copiar URL"
+        ></button>
+      </div>
+      <small class="text-primary">Los colaboradores deberán iniciar sesión para acceder.</small>
+    </div>
+
+    <div class="flex justify-content-end">
+      <button
+        pButton
+        label="Cerrar"
+        (click)="close()"
+      ></button>
+    </div>
+  </div>
+}
