@@ -112,12 +112,17 @@ export class WebsocketService {
     });
   }
 
-  async sendChanges(sessionId: string, userEmail: string, delta: any): Promise<void> {
+  // async sendChanges(sessionId: string, userEmail: string, delta: any): Promise<void> {
+  //   console.log('[WebsocketService] Sending changes:', delta);
+  //
+  //   await this.ensureConnection();
+  //
+  //   this.socket.emit('editorChanges', { sessionId, userEmail, delta });
+  // }
+
+  sendChanges(delta: any): void {
     console.log('[WebsocketService] Sending changes:', delta);
-
-    await this.ensureConnection();
-
-    this.socket.emit('editorChanges', { sessionId, userEmail, delta });
+    this.socket.emit('editorChanges', { delta });
   }
 
   onEditorChanges(): Observable<any> {
