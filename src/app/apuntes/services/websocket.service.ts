@@ -10,7 +10,7 @@ export class WebsocketService {
   private socket: Socket;
   private readonly url = environment.wsUrl;
 
-  constructor() {
+  constructor () {
     console.log('[WebsocketService] Initializing');
     this.socket = io(this.url, {
       autoConnect: false,
@@ -20,7 +20,7 @@ export class WebsocketService {
     this.setupSocketListeners();
   }
 
-  private setupSocketListeners() {
+  private setupSocketListeners () {
     this.socket.on('connect', () => {
       console.log('[WebsocketService] Connected to server with ID:', this.socket.id);
     });
@@ -34,7 +34,7 @@ export class WebsocketService {
     });
   }
 
-  private async ensureConnection(): Promise<void> {
+  private async ensureConnection (): Promise<void> {
     if (this.socket.connected) {
       console.log('[WebsocketService] Socket already connected');
       return;
@@ -54,30 +54,34 @@ export class WebsocketService {
     }
   }
 
-  async createSession(creatorEmail: string): Promise<any> {
+  async createSession (creatorEmail: string, initialContent?: any): Promise<any> {
     console.log('[WebsocketService] Creating session for:', creatorEmail);
+    console.log('[WebsocketService] Initial content:', initialContent);
 
     await this.ensureConnection();
 
     return new Promise((resolve, reject) => {
-      this.socket.emit('createSession', { creatorEmail }, (response: any) => {
-        console.log('[WebsocketService] Create session response:', response);
-        if (response.status === 'success') {
-          resolve(response);
-        } else {
-          reject(new Error(response.message));
+      this.socket.emit('createSession',
+        {creatorEmail, initialContent},
+        (response: any) => {
+          console.log('[WebsocketService] Create session response:', response);
+          if (response.status === 'success') {
+            resolve(response);
+          } else {
+            reject(new Error(response.message));
+          }
         }
-      });
+      );
     });
   }
 
-  async joinSession(sessionId: string, userEmail: string): Promise<any> {
+  async joinSession (sessionId: string, userEmail: string): Promise<any> {
     console.log('[WebsocketService] Joining session:', sessionId);
 
     await this.ensureConnection();
 
     return new Promise((resolve, reject) => {
-      this.socket.emit('joinSession', { sessionId, userEmail }, (response: any) => {
+      this.socket.emit('joinSession', {sessionId, userEmail}, (response: any) => {
         console.log('[WebsocketService] Join session response:', response);
         if (response.status === 'success') {
           resolve(response);
@@ -88,7 +92,7 @@ export class WebsocketService {
     });
   }
 
-  async addAllowedUsers(
+  async addAllowedUsers (
     sessionId: string,
     creatorEmail: string,
     usersToAdd: string[]
@@ -99,7 +103,7 @@ export class WebsocketService {
 
     return new Promise((resolve, reject) => {
       this.socket.emit('addAllowedUsers',
-        { sessionId, creatorEmail, usersToAdd },
+        {sessionId, creatorEmail, usersToAdd},
         (response: any) => {
           console.log('[WebsocketService] Add allowed users response:', response);
           if (response.status === 'success') {
@@ -120,20 +124,28 @@ export class WebsocketService {
   //   this.socket.emit('editorChanges', { sessionId, userEmail, delta });
   // }
 
-  sendChanges(sessionId: string, userEmail: string, delta: any): void {
+  sendChanges (
+    sessionId: string,
+    userEmail: string,
+    delta: any,
+    content?: any
+  ): void {
     console.log('[WebsocketService] Sending changes:', {
       sessionId,
       userEmail,
-      delta
+      delta,
+      content
     });
 
     this.socket.emit('editorChanges', {
       sessionId,
       userEmail,
-      delta
+      delta,
+      content
     });
   }
-  onEditorChanges(): Observable<any> {
+
+  onEditorChanges (): Observable<any> {
     console.log('[WebsocketService] Setting up editor changes listener');
     const changes$ = new Subject<any>();
 
@@ -145,7 +157,7 @@ export class WebsocketService {
     return changes$.asObservable();
   }
 
-  onUserJoined(): Observable<any> {
+  onUserJoined (): Observable<any> {
     console.log('[WebsocketService] Setting up user joined listener');
     const userJoined$ = new Subject<any>();
 
@@ -157,14 +169,14 @@ export class WebsocketService {
     return userJoined$.asObservable();
   }
 
-  disconnect() {
+  disconnect () {
     console.log('[WebsocketService] Disconnecting');
     if (this.socket.connected) {
       this.socket.disconnect();
     }
   }
 
-  isConnected(): boolean {
+  isConnected (): boolean {
     return this.socket.connected;
   }
 }

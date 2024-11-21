@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { WebsocketService } from './websocket.service';
-import { map, merge, Observable, Subject, tap } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 import { BufferService } from './buffer.service';
 import { EditorChange, QuillDelta } from '../components/interfaces/editor.interface';
 
@@ -15,10 +15,25 @@ export class EditorService {
 
   private sessionId: string | null = null;
   private isProcessingChanges = false;
+  private currentContent: any = null;
   private _contentSubject = new Subject<EditorChange>();
 
-  async initializeCollaborativeSession(invitedUsers: string[]): Promise<string> {
+  // Método para obtener el contenido actual
+  async getCurrentContent(): Promise<any> {
+    console.log('[EditorService] Getting current content:', this.currentContent);
+    return this.currentContent;
+  }
+
+  // Método para actualizar el contenido actual
+  setCurrentContent(content: any): void {
+    console.log('[EditorService] Setting current content:', content);
+    this.currentContent = content;
+  }
+
+  async initializeCollaborativeSession(invitedUsers: string[], initialContent: any): Promise<string> {
     console.log('[EditorService] Initializing collaborative session');
+    console.log('[EditorService] Initial content:', initialContent);
+
     const currentUser = this.authService.currentUser();
 
     if (!currentUser) {
@@ -27,8 +42,14 @@ export class EditorService {
     }
 
     try {
-      // Crear sesión
-      const createResponse = await this.websocketService.createSession(currentUser.email);
+      // Guardar el contenido actual
+      this.setCurrentContent(initialContent);
+
+      // Crear sesión con contenido inicial
+      const createResponse = await this.websocketService.createSession(
+        currentUser.email,
+        initialContent
+      );
       this.sessionId = createResponse.sessionId;
       console.log('[EditorService] Session created:', this.sessionId);
 
@@ -57,8 +78,15 @@ export class EditorService {
     }
 
     try {
-      await this.websocketService.joinSession(sessionId, currentUser.email);
+      const response = await this.websocketService.joinSession(sessionId, currentUser.email);
       this.sessionId = sessionId;
+
+      // Actualizar el contenido actual con el recibido del servidor
+      if (response.currentContent?.content) {
+        console.log('[EditorService] Received initial content:', response.currentContent.content);
+        this.setCurrentContent(response.currentContent.content);
+      }
+
       console.log('[EditorService] Join successful');
     } catch (error) {
       console.error('[EditorService] Join error:', error);
@@ -69,17 +97,23 @@ export class EditorService {
   getChanges(): Observable<EditorChange> {
     console.log('[EditorService] Setting up changes observer');
     return this.websocketService.onEditorChanges().pipe(
-      map(change => ({
-        delta: change.delta,
-        userId: change.userEmail,
-        timestamp: change.timestamp,
-        version: 0
-      }))
+      map(change => {
+        // Actualizar el contenido actual con los cambios recibidos
+        if (change.content) {
+          this.setCurrentContent(change.content);
+        }
+        return {
+          delta: change.delta,
+          userId: change.userEmail,
+          timestamp: change.timestamp,
+          version: 0
+        };
+      })
     );
   }
 
-  sendChanges(delta: any): void {
-    console.log('[EditorService] Processing changes:', delta);
+  sendChanges(changes: { delta: any, contents: any }): void {
+    console.log('[EditorService] Processing changes:', changes);
 
     if (!this.sessionId || this.isProcessingChanges) {
       console.warn('[EditorService] Cannot send changes - no session or processing');
@@ -95,13 +129,17 @@ export class EditorService {
     try {
       this.isProcessingChanges = true;
 
+      // Actualizar el contenido local con el contenido completo actualizado
+      this.setCurrentContent(changes.contents);
+
       // Enviar a través de WebSocket
       this.websocketService.sendChanges(
         this.sessionId,
         currentUser.email,
-        delta
+        changes.delta,
+        changes.contents  // Enviamos el contenido completo actualizado
       );
-      console.log('[EditorService] Change sent to WebSocket');
+      console.log('[EditorService] Change sent to WebSocket with full contents');
 
     } catch (error) {
       console.error('[EditorService] Error sending changes:', error);
@@ -119,5 +157,6 @@ export class EditorService {
     console.log('[EditorService] Disconnecting from session');
     this.websocketService.disconnect();
     this.sessionId = null;
+    this.currentContent = null;
   }
 }

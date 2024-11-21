@@ -49,7 +49,7 @@ export class InviteDialogComponent implements OnInit {
 
   private createEmailGroup() {
     return this.fb.group({
-      email: [{ value: '', disabled: false }, [
+      email: ['', [
         Validators.required,
         Validators.pattern(this.validationsService.emailPattern)
       ]]
@@ -141,11 +141,20 @@ export class InviteDialogComponent implements OnInit {
     this.disableForm();
 
     try {
+      // Obtener lista de emails invitados
       const invitedEmails = this.invitations.controls.map(control =>
         control.get('email')?.value
       );
 
-      const sessionId = await this.editorService.initializeCollaborativeSession(invitedEmails);
+      console.log('[InviteDialog] Getting current editor content');
+      const currentContent = await this.editorService.getCurrentContent();
+      console.log('[InviteDialog] Current content:', currentContent);
+
+      // Iniciar sesión colaborativa con el contenido actual
+      const sessionId = await this.editorService.initializeCollaborativeSession(
+        invitedEmails,
+        currentContent
+      );
       console.log('[InviteDialog] Collaborative session initialized:', sessionId);
 
       // Construir URL colaborativa con el ID de sesión

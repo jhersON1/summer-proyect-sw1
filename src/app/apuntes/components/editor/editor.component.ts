@@ -7,7 +7,6 @@ import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component'
 import Quill from 'quill';
 import { Subscription } from 'rxjs';
 import { EditorChange, QuillDelta } from '../interfaces/editor.interface';
-import Delta from 'quill';
 
 @Component({
   selector: 'app-editor',
@@ -17,7 +16,7 @@ import Delta from 'quill';
 })
 export class EditorComponent implements OnInit, OnDestroy {
   @Input() tamanoPapel!: string;
-  @ViewChild('editor', { static: true }) quillEditor!: QuillEditorComponent;
+  @ViewChild(QuillEditorComponent) quillEditor!: QuillEditorComponent;
 
   private route = inject(ActivatedRoute);
   private editorService = inject(EditorService);
@@ -59,9 +58,15 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  created(event: Quill) {
-    console.log('[EditorComponent] Quill Editor Created:', event);
-    this.quillInstance = event;
+  created(quill: Quill) {
+    console.log('[EditorComponent] Quill Editor Created');
+    this.quillInstance = quill;
+
+    // Guardar contenido inicial en el servicio
+    const contents = this.quillInstance.getContents();
+    console.log('[EditorComponent] Initial editor contents:', contents);
+    this.editorService.setCurrentContent(contents);
+
     this.initialized = true;
   }
 
@@ -73,14 +78,37 @@ export class EditorComponent implements OnInit, OnDestroy {
 
     console.log('[EditorComponent] Content changed event:', event);
 
-    if (this.isCollaborativeMode && this.quillInstance) {
-      console.log('[EditorComponent] Sending collaborative change');
-      this.editorService.sendChanges(event.delta);
+    if (this.quillInstance) {
+      // Obtener el contenido completo actualizado
+      const currentContents = this.quillInstance.getContents();
+      console.log('[EditorComponent] Current editor contents:', currentContents);
+
+      // Actualizar contenido en el servicio
+      this.editorService.setCurrentContent(currentContents);
+
+      if (this.isCollaborativeMode) {
+        console.log('[EditorComponent] Sending collaborative change');
+        // Enviar tanto el delta como el contenido completo
+        this.editorService.sendChanges({
+          delta: event.delta,
+          contents: currentContents
+        });
+      }
     }
   }
 
-  showInviteDialog() {
+  async showInviteDialog() {
     console.log('[EditorComponent] Opening invite dialog');
+    if (!this.quillInstance) {
+      console.error('[EditorComponent] Quill instance not initialized');
+      return;
+    }
+
+    // Obtener el contenido actual antes de abrir el diálogo
+    const currentContents = this.quillInstance.getContents();
+    console.log('[EditorComponent] Current contents before opening dialog:', currentContents);
+    this.editorService.setCurrentContent(currentContents);
+
     const ref = this.dialogService.open(InviteDialogComponent, {
       header: 'Invitar Colaboradores',
       width: '50%',
