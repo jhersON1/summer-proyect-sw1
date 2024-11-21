@@ -27,6 +27,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   private quillInstance!: Quill;
   isCollaborativeMode = false;
   isProcessingRemoteChange = false;
+  private pendingChanges: EditorChange[] = [];
 
   ngOnInit(): void {
     console.log('[EditorComponent] Initializing...');
@@ -71,6 +72,15 @@ export class EditorComponent implements OnInit, OnDestroy {
   created(event: Quill) {
     console.log('[EditorComponent] Quill Editor Created:', event);
     this.quillInstance = event;
+
+    // Aplicar cambios pendientes
+    while (this.pendingChanges.length > 0) {
+      const change = this.pendingChanges.shift();
+      if (!change) {
+        console.error('Pending change is null or empty');
+      }
+      this.applyRemoteChange(change!);
+    }
   }
 
   changedContent(event: any) {
@@ -94,7 +104,8 @@ export class EditorComponent implements OnInit, OnDestroy {
   //todo cambiar any por EditorState
   private applyRemoteChange(change: any): void {
     if (!this.quillInstance) {
-      console.error('[EditorComponent] Cannot apply change - Quill not initialized');
+      console.log('[EditorComponent] Queuing change - Quill not initialized');
+      this.pendingChanges.push(change);
       return;
     }
 
@@ -103,7 +114,7 @@ export class EditorComponent implements OnInit, OnDestroy {
       console.log('[EditorComponent] Applying remote change:', change);
       this.quillInstance.updateContents(change.delta, 'api');
     } catch (error) {
-      console.error('[EditorComponent] Error applying remote change:', error);
+      console.error('[EditorComponent] Error applying change:', error);
     } finally {
       this.isProcessingRemoteChange = false;
     }

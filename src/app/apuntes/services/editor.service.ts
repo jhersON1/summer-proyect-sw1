@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { WebsocketService } from './websocket.service';
-import { Observable, tap } from 'rxjs';
+import { merge, Observable, Subject, tap } from 'rxjs';
 import { BufferService } from './buffer.service';
 import { EditorChange, QuillDelta } from '../components/interfaces/editor.interface';
 
@@ -15,6 +15,8 @@ export class EditorService {
 
   private sessionId: string | null = null;
   private isProcessingChanges = false;
+
+  private _contentSubject = new Subject<EditorChange>();
 
   async initializeCollaborativeSession(invitedUsers: string[]): Promise<string> {
     console.log('[EditorService] Initializing collaborative session');
@@ -48,24 +50,68 @@ export class EditorService {
       throw error;
     }
   }
-
   async joinSession(sessionId: string): Promise<void> {
     console.log('[EditorService] Joining session:', sessionId);
     const currentUser = this.authService.currentUser();
 
     if (!currentUser) {
+      console.error('[EditorService] No user authenticated');
       throw new Error('No user authenticated');
     }
 
     try {
-      await this.websocketService.joinSession(sessionId, currentUser.email);
+      console.log('[EditorService] Attempting to join with user:', currentUser.email);
+      const response = await this.websocketService.joinSession(sessionId, currentUser.email);
       this.sessionId = sessionId;
-      this.bufferService.clearBuffer(); // Limpiar buffer al unirse
-      console.log('[EditorService] Joined session successfully');
+
+      if (response.currentContent?.changes) {
+        console.log('[EditorService] Received changes history:', response.currentContent.changes.length, 'changes');
+
+        // Aplicar cambios en orden
+        response.currentContent.changes.forEach((change: { delta: any; userId: any; timestamp: any; version: any; }, index: number) => {
+          console.log(`[EditorService] Applying change ${index + 1}/${response.currentContent.changes.length}`);
+
+          this._contentSubject.next({
+            delta: change.delta,
+            userId: change.userId,
+            timestamp: change.timestamp,
+            version: change.version
+          });
+        });
+      } else {
+        console.log('[EditorService] No initial content received');
+      }
+
+      // Limpiar y actualizar buffer
+      this.bufferService.clearBuffer();
+      console.log(`[EditorService] Joined session successfully. Version: ${response.currentContent?.version || 0}`);
+
     } catch (error) {
       console.error('[EditorService] Error joining session:', error);
       throw error;
     }
+  }
+
+  getChanges(): Observable<EditorChange> {
+    return merge(
+      this._contentSubject.asObservable(),
+      this.websocketService.onEditorChanges()
+    ).pipe(
+      tap(change => {
+        console.log('[EditorService] Broadcasting change:', change);
+        this.bufferService.addChange(change);
+      })
+    );
+  }
+
+
+  private sendInitialContent(content: any) {
+    this._contentSubject.next({
+      delta: content,
+      userId: 'system',
+      timestamp: Date.now(),
+      version: 0
+    });
   }
 
   sendChanges(delta: QuillDelta): void {
@@ -107,16 +153,6 @@ export class EditorService {
     }
   }
 
-  getChanges(): Observable<EditorChange> {
-    console.log('[EditorService] Setting up changes listener');
-    return this.websocketService.onEditorChanges().pipe(
-      tap(change => {
-        console.log('[EditorService] Received change:', change);
-        // Añadir cambio recibido al buffer
-        this.bufferService.addChange(change);
-      })
-    );
-  }
 
   getUserUpdates(): Observable<any> {
     console.log('[EditorService] Setting up user updates listener');
