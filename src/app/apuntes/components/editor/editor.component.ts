@@ -7,6 +7,7 @@ import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component'
 import Quill from 'quill';
 import { Subscription } from 'rxjs';
 import { EditorChange, QuillDelta } from '../interfaces/editor.interface';
+import Delta from 'quill-delta';
 
 @Component({
   selector: 'app-editor',
@@ -27,6 +28,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   isCollaborativeMode = false;
   isProcessingRemoteChange = false;
   initialized = false;
+  private pendingInitialContent: any = null;
 
   ngOnInit(): void {
     console.log('[EditorComponent] Initializing...');
@@ -49,6 +51,20 @@ export class EditorComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Suscribirse a contenido inicial
+    this.subscriptions.push(
+      this.editorService.getInitialContent().subscribe(content => {
+        console.log('[EditorComponent] Received initial content from service:', content);
+        if (this.quillInstance) {
+          console.log('[EditorComponent] Applying initial content immediately');
+          this.applyInitialContent(content);
+        } else {
+          console.log('[EditorComponent] Storing initial content for later');
+          this.pendingInitialContent = content;
+        }
+      })
+    );
+
     // Verificar sessionId en URL
     this.route.queryParams.subscribe(params => {
       if (params['sessionId']) {
@@ -62,12 +78,39 @@ export class EditorComponent implements OnInit, OnDestroy {
     console.log('[EditorComponent] Quill Editor Created');
     this.quillInstance = quill;
 
-    // Guardar contenido inicial en el servicio
-    const contents = this.quillInstance.getContents();
-    console.log('[EditorComponent] Initial editor contents:', contents);
-    this.editorService.setCurrentContent(contents);
+    // Si hay contenido inicial pendiente, aplicarlo ahora
+    if (this.pendingInitialContent) {
+      console.log('[EditorComponent] Applying pending initial content');
+      this.applyInitialContent(this.pendingInitialContent);
+      this.pendingInitialContent = null;
+    } else {
+      // Guardar contenido inicial en el servicio
+      const contents = this.quillInstance.getContents();
+      console.log('[EditorComponent] Initial editor contents:', contents);
+      this.editorService.setCurrentContent(contents);
+    }
 
     this.initialized = true;
+  }
+
+  private applyInitialContent(content: any) {
+    if (!this.quillInstance) {
+      console.error('[EditorComponent] Cannot apply content - editor not initialized');
+      return;
+    }
+
+    console.log('[EditorComponent] Applying initial content:', content);
+    this.isProcessingRemoteChange = true;
+    try {
+      // Asegurarse de que el contenido sea un Delta válido
+      const delta = new Delta(content.ops);
+      this.quillInstance.setContents(delta, 'silent');
+      this.editorService.setCurrentContent(delta);
+      console.log('[EditorComponent] Initial content applied successfully');
+    } catch (error) {
+      console.error('[EditorComponent] Error applying initial content:', error);
+    }
+    this.isProcessingRemoteChange = false;
   }
 
   changedContent(event: any) {

@@ -17,6 +17,13 @@ export class EditorService {
   private isProcessingChanges = false;
   private currentContent: any = null;
   private _contentSubject = new Subject<EditorChange>();
+  private _initialContentSubject = new Subject<any>();
+
+  // Método para obtener el contenido inicial
+  getInitialContent(): Observable<any> {
+    return this._initialContentSubject.asObservable();
+  }
+
 
   // Método para obtener el contenido actual
   async getCurrentContent(): Promise<any> {
@@ -85,6 +92,8 @@ export class EditorService {
       if (response.currentContent?.content) {
         console.log('[EditorService] Received initial content:', response.currentContent.content);
         this.setCurrentContent(response.currentContent.content);
+        // Emitir el contenido inicial al componente
+        this._initialContentSubject.next(response.currentContent.content);
       }
 
       console.log('[EditorService] Join successful');
