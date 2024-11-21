@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { WebsocketService } from './websocket.service';
-import { merge, Observable, Subject, tap } from 'rxjs';
+import { map, merge, Observable, Subject, tap } from 'rxjs';
 import { BufferService } from './buffer.service';
 import { EditorChange, QuillDelta } from '../components/interfaces/editor.interface';
 
@@ -15,7 +15,6 @@ export class EditorService {
 
   private sessionId: string | null = null;
   private isProcessingChanges = false;
-
   private _contentSubject = new Subject<EditorChange>();
 
   async initializeCollaborativeSession(invitedUsers: string[]): Promise<string> {
@@ -23,6 +22,7 @@ export class EditorService {
     const currentUser = this.authService.currentUser();
 
     if (!currentUser) {
+      console.error('[EditorService] No authenticated user found');
       throw new Error('No user authenticated');
     }
 
@@ -34,17 +34,13 @@ export class EditorService {
 
       // Añadir usuarios permitidos
       await this.websocketService.addAllowedUsers(
-        this.sessionId as string,
+        this.sessionId!,
         currentUser.email,
         invitedUsers
       );
-      console.log('[EditorService] Users added to session');
+      console.log('[EditorService] Users added to session:', invitedUsers);
 
-      // Limpiar buffer al iniciar nueva sesión
-      this.bufferService.clearBuffer();
-
-      return this.sessionId as string;
-
+      return this.sessionId!;
     } catch (error) {
       console.error('[EditorService] Error initializing session:', error);
       throw error;
@@ -61,64 +57,32 @@ export class EditorService {
     }
 
     try {
-      console.log('[EditorService] Attempting to join with user:', currentUser.email);
-      const response = await this.websocketService.joinSession(sessionId, currentUser.email);
+      await this.websocketService.joinSession(sessionId, currentUser.email);
       this.sessionId = sessionId;
-
-      // Primero aplicar el contenido inicial completo
-      if (response.currentContent?.initialContent) {
-        console.log('[EditorService] Applying initial content:', response.currentContent.initialContent);
-        this._contentSubject.next({
-          delta: response.currentContent.initialContent,
-          userId: 'system',
-          timestamp: Date.now(),
-          version: 0
-        });
-      }
-
-      // Luego aplicar los cambios incrementales
-      if (response.currentContent?.changes?.length > 0) {
-        console.log('[EditorService] Applying change history:', response.currentContent.changes);
-        response.currentContent.changes.forEach((change: EditorChange) => {
-          this._contentSubject.next(change);
-        });
-      }
-
-      this.bufferService.clearBuffer();
-      console.log(`[EditorService] Joined session successfully. Version: ${response.currentContent?.version || 0}`);
+      console.log('[EditorService] Join successful');
     } catch (error) {
-      console.error('[EditorService] Error joining session:', error);
+      console.error('[EditorService] Join error:', error);
       throw error;
     }
   }
 
   getChanges(): Observable<EditorChange> {
-    return merge(
-      this._contentSubject.asObservable(),
-      this.websocketService.onEditorChanges()
-    ).pipe(
-      tap(change => {
-        console.log('[EditorService] Broadcasting change:', change);
-        this.bufferService.addChange(change);
-      })
+    console.log('[EditorService] Setting up changes observer');
+    return this.websocketService.onEditorChanges().pipe(
+      map(change => ({
+        delta: change.delta,
+        userId: change.userEmail,
+        timestamp: change.timestamp,
+        version: 0
+      }))
     );
   }
 
-
-  private sendInitialContent(content: any) {
-    this._contentSubject.next({
-      delta: content,
-      userId: 'system',
-      timestamp: Date.now(),
-      version: 0
-    });
-  }
-
-  sendChanges(delta: QuillDelta): void {
+  sendChanges(delta: any): void {
     console.log('[EditorService] Processing changes:', delta);
 
     if (!this.sessionId || this.isProcessingChanges) {
-      console.warn('[EditorService] Cannot send changes - no active session or already processing');
+      console.warn('[EditorService] Cannot send changes - no session or processing');
       return;
     }
 
@@ -131,21 +95,14 @@ export class EditorService {
     try {
       this.isProcessingChanges = true;
 
-      // Crear objeto de cambio
-      const change: EditorChange = {
-        delta,
-        userId: currentUser.email,
-        timestamp: Date.now(),
-        version: this.bufferService.getCurrentVersion()
-      };
-
-      // Añadir al buffer local
-      this.bufferService.addChange(change);
-
       // Enviar a través de WebSocket
-      this.websocketService.sendChanges(this.sessionId, currentUser.email, change);
+      this.websocketService.sendChanges(
+        this.sessionId,
+        currentUser.email,
+        delta
+      );
+      console.log('[EditorService] Change sent to WebSocket');
 
-      console.log('[EditorService] Changes sent successfully');
     } catch (error) {
       console.error('[EditorService] Error sending changes:', error);
     } finally {
@@ -153,26 +110,14 @@ export class EditorService {
     }
   }
 
-
   getUserUpdates(): Observable<any> {
     console.log('[EditorService] Setting up user updates listener');
-    return this.websocketService.onUserJoined().pipe(
-      tap(update => console.log('[EditorService] User update received:', update))
-    );
-  }
-
-  getBufferStatus() {
-    return this.bufferService.getBufferStatus();
+    return this.websocketService.onUserJoined();
   }
 
   disconnect(): void {
-    console.log('[EditorService] Disconnecting');
-    if (this.bufferService.hasPendingChanges()) {
-      console.warn('[EditorService] There are pending changes in buffer');
-      // Aquí podríamos implementar lógica para guardar cambios pendientes
-    }
+    console.log('[EditorService] Disconnecting from session');
     this.websocketService.disconnect();
-    this.bufferService.clearBuffer();
     this.sessionId = null;
   }
 }

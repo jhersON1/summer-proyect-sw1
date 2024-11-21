@@ -1,4 +1,3 @@
-// editor.component.ts
 import { Component, Input, OnInit, ViewChild, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { QuillEditorComponent } from 'ngx-quill';
@@ -8,6 +7,7 @@ import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component'
 import Quill from 'quill';
 import { Subscription } from 'rxjs';
 import { EditorChange, QuillDelta } from '../interfaces/editor.interface';
+import Delta from 'quill';
 
 @Component({
   selector: 'app-editor',
@@ -27,7 +27,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   private quillInstance!: Quill;
   isCollaborativeMode = false;
   isProcessingRemoteChange = false;
-  private pendingChanges: EditorChange[] = [];
+  initialized = false;
 
   ngOnInit(): void {
     console.log('[EditorComponent] Initializing...');
@@ -37,20 +37,15 @@ export class EditorComponent implements OnInit, OnDestroy {
       this.editorService.getChanges().subscribe({
         next: (change: EditorChange) => {
           console.log('[EditorComponent] Received change:', change);
-          this.applyRemoteChange(change);
+          if (this.quillInstance && !this.isProcessingRemoteChange) {
+            console.log('[EditorComponent] Applying remote change');
+            this.isProcessingRemoteChange = true;
+            this.quillInstance.updateContents(change.delta as any);
+            this.isProcessingRemoteChange = false;
+          }
         },
         error: (error) => {
           console.error('[EditorComponent] Error receiving changes:', error);
-        }
-      })
-    );
-
-    // Suscribirse a actualizaciones de usuarios
-    this.subscriptions.push(
-      this.editorService.getUserUpdates().subscribe({
-        next: (update) => {
-          console.log('[EditorComponent] User update received:', update);
-          this.isCollaborativeMode = true;
         }
       })
     );
@@ -64,83 +59,23 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    console.log('[EditorComponent] Destroying component');
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-  }
-
   created(event: Quill) {
     console.log('[EditorComponent] Quill Editor Created:', event);
     this.quillInstance = event;
-
-    // Escuchar cambios del editor
-    this.quillInstance.on('text-change', (delta, oldDelta, source) => {
-      console.log('[EditorComponent] Text changed:', { delta, source });
-      if (source === 'user') {
-        this.changedContent({ delta, source });
-      }
-    });
+    this.initialized = true;
   }
 
   changedContent(event: any) {
-    console.log('[EditorComponent] Content Changed:', event);
-    if (!event || !event.delta || event.source !== 'user') {
+    if (!event?.delta || this.isProcessingRemoteChange) {
+      console.log('[EditorComponent] Ignoring change event - processing remote change or no delta');
       return;
     }
 
-    if (this.isProcessingRemoteChange) {
-      console.log('[EditorComponent] Ignoring change - processing remote update');
-      return;
-    }
+    console.log('[EditorComponent] Content changed event:', event);
 
-    if (this.isCollaborativeMode) {
+    if (this.isCollaborativeMode && this.quillInstance) {
       console.log('[EditorComponent] Sending collaborative change');
-      const delta: QuillDelta = event.delta;
-      this.editorService.sendChanges(delta);
-    }
-  }
-
-  //todo cambiar any por EditorState
-  // private applyRemoteChange(change: any): void {
-  //   if (!this.quillInstance) {
-  //     console.log('[EditorComponent] Queuing change - Quill not initialized');
-  //     this.pendingChanges.push(change);
-  //     return;
-  //   }
-  //
-  //   try {
-  //     this.isProcessingRemoteChange = true;
-  //     console.log('[EditorComponent] Applying remote change:', change);
-  //     this.quillInstance.updateContents(change.delta, 'api');
-  //   } catch (error) {
-  //     console.error('[EditorComponent] Error applying change:', error);
-  //   } finally {
-  //     this.isProcessingRemoteChange = false;
-  //   }
-  // }
-
-  private applyRemoteChange(change: any): void {
-    console.log('[EditorComponent] Applying remote change:', change);
-
-    if (!this.quillInstance) {
-      console.error('[EditorComponent] Quill not initialized');
-      return;
-    }
-
-    try {
-      this.isProcessingRemoteChange = true;
-      // Usar setContents para contenido inicial, updateContents para cambios
-      if (change.userId === 'system') {
-        console.log('[EditorComponent] Setting initial content');
-        this.quillInstance.setContents(change.delta);
-      } else {
-        console.log('[EditorComponent] Updating content with delta');
-        this.quillInstance.updateContents(change.delta);
-      }
-    } catch (error) {
-      console.error('[EditorComponent] Error applying change:', error);
-    } finally {
-      this.isProcessingRemoteChange = false;
+      this.editorService.sendChanges(event.delta);
     }
   }
 
@@ -160,5 +95,10 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.isCollaborativeMode = true;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    console.log('[EditorComponent] Destroying component');
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }
