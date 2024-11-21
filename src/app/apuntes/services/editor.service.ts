@@ -50,6 +50,7 @@ export class EditorService {
       throw error;
     }
   }
+
   async joinSession(sessionId: string): Promise<void> {
     console.log('[EditorService] Joining session:', sessionId);
     const currentUser = this.authService.currentUser();
@@ -64,28 +65,27 @@ export class EditorService {
       const response = await this.websocketService.joinSession(sessionId, currentUser.email);
       this.sessionId = sessionId;
 
-      if (response.currentContent?.changes) {
-        console.log('[EditorService] Received changes history:', response.currentContent.changes.length, 'changes');
-
-        // Aplicar cambios en orden
-        response.currentContent.changes.forEach((change: { delta: any; userId: any; timestamp: any; version: any; }, index: number) => {
-          console.log(`[EditorService] Applying change ${index + 1}/${response.currentContent.changes.length}`);
-
-          this._contentSubject.next({
-            delta: change.delta,
-            userId: change.userId,
-            timestamp: change.timestamp,
-            version: change.version
-          });
+      // Primero aplicar el contenido inicial completo
+      if (response.currentContent?.initialContent) {
+        console.log('[EditorService] Applying initial content:', response.currentContent.initialContent);
+        this._contentSubject.next({
+          delta: response.currentContent.initialContent,
+          userId: 'system',
+          timestamp: Date.now(),
+          version: 0
         });
-      } else {
-        console.log('[EditorService] No initial content received');
       }
 
-      // Limpiar y actualizar buffer
+      // Luego aplicar los cambios incrementales
+      if (response.currentContent?.changes?.length > 0) {
+        console.log('[EditorService] Applying change history:', response.currentContent.changes);
+        response.currentContent.changes.forEach((change: EditorChange) => {
+          this._contentSubject.next(change);
+        });
+      }
+
       this.bufferService.clearBuffer();
       console.log(`[EditorService] Joined session successfully. Version: ${response.currentContent?.version || 0}`);
-
     } catch (error) {
       console.error('[EditorService] Error joining session:', error);
       throw error;

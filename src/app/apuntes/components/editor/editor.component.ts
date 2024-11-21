@@ -73,14 +73,13 @@ export class EditorComponent implements OnInit, OnDestroy {
     console.log('[EditorComponent] Quill Editor Created:', event);
     this.quillInstance = event;
 
-    // Aplicar cambios pendientes
-    while (this.pendingChanges.length > 0) {
-      const change = this.pendingChanges.shift();
-      if (!change) {
-        console.error('Pending change is null or empty');
+    // Escuchar cambios del editor
+    this.quillInstance.on('text-change', (delta, oldDelta, source) => {
+      console.log('[EditorComponent] Text changed:', { delta, source });
+      if (source === 'user') {
+        this.changedContent({ delta, source });
       }
-      this.applyRemoteChange(change!);
-    }
+    });
   }
 
   changedContent(event: any) {
@@ -102,17 +101,42 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   //todo cambiar any por EditorState
+  // private applyRemoteChange(change: any): void {
+  //   if (!this.quillInstance) {
+  //     console.log('[EditorComponent] Queuing change - Quill not initialized');
+  //     this.pendingChanges.push(change);
+  //     return;
+  //   }
+  //
+  //   try {
+  //     this.isProcessingRemoteChange = true;
+  //     console.log('[EditorComponent] Applying remote change:', change);
+  //     this.quillInstance.updateContents(change.delta, 'api');
+  //   } catch (error) {
+  //     console.error('[EditorComponent] Error applying change:', error);
+  //   } finally {
+  //     this.isProcessingRemoteChange = false;
+  //   }
+  // }
+
   private applyRemoteChange(change: any): void {
+    console.log('[EditorComponent] Applying remote change:', change);
+
     if (!this.quillInstance) {
-      console.log('[EditorComponent] Queuing change - Quill not initialized');
-      this.pendingChanges.push(change);
+      console.error('[EditorComponent] Quill not initialized');
       return;
     }
 
     try {
       this.isProcessingRemoteChange = true;
-      console.log('[EditorComponent] Applying remote change:', change);
-      this.quillInstance.updateContents(change.delta, 'api');
+      // Usar setContents para contenido inicial, updateContents para cambios
+      if (change.userId === 'system') {
+        console.log('[EditorComponent] Setting initial content');
+        this.quillInstance.setContents(change.delta);
+      } else {
+        console.log('[EditorComponent] Updating content with delta');
+        this.quillInstance.updateContents(change.delta);
+      }
     } catch (error) {
       console.error('[EditorComponent] Error applying change:', error);
     } finally {
