@@ -19,7 +19,7 @@ import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ToastModule } from 'primeng/toast';
 import { MessagesModule } from 'primeng/messages';
 import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { QuillModule } from 'ngx-quill';
 import { UsersPanelComponent } from './components/users-panel/users-panel.component';
@@ -55,6 +55,7 @@ import { SidebarModule } from 'primeng/sidebar';
 
     QuillEditorComponent,
     ReactiveFormsModule,
+    FormsModule,
   ]
 })
 export class ApuntesModule { }
