@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { WebsocketService } from './websocket.service';
-import { map, Observable, Subject } from 'rxjs';
+import { map, Observable, Subject, tap } from 'rxjs';
 import { BufferService } from './buffer.service';
 import { EditorChange, QuillDelta } from '../components/interfaces/editor.interface';
+import { CollaborationUpdate, UserPermissions } from '../components/interfaces/collaboration.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -157,10 +158,48 @@ export class EditorService {
     }
   }
 
-  getUserUpdates(): Observable<any> {
-    console.log('[EditorService] Setting up user updates listener');
-    return this.websocketService.onUserJoined();
+  getUserUpdates(): Observable<CollaborationUpdate> {
+    console.log('[EditorService] Setting up user updates stream');
+
+    return this.websocketService.onCollaborationUpdates().pipe(
+      tap(update => console.log('[EditorService] Received collaboration update:', update)),
+      map(update => {
+        if (!update.timestamp) {
+          update.timestamp = Date.now();
+        }
+        return update;
+      })
+    );
   }
+
+    // Nuevo método para actualizar permisos de usuario
+    async updateUserPermissions(userEmail: string, newPermissions: UserPermissions): Promise<void> {
+      console.log('[EditorService] Updating permissions for user:', userEmail, newPermissions);
+
+      if (!this.sessionId) {
+        console.error('[EditorService] No active session');
+        throw new Error('No active session');
+      }
+
+      const currentUser = this.authService.currentUser();
+      if (!currentUser) {
+        console.error('[EditorService] No authenticated user');
+        throw new Error('No authenticated user');
+      }
+
+      try {
+        await this.websocketService.updateUserPermissions(
+          this.sessionId,
+          userEmail,
+          newPermissions,
+          currentUser.email
+        );
+        console.log('[EditorService] Permissions updated successfully');
+      } catch (error) {
+        console.error('[EditorService] Error updating permissions:', error);
+        throw error;
+      }
+    }
 
   disconnect(): void {
     console.log('[EditorService] Disconnecting from session');

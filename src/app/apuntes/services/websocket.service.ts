@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Socket, io } from 'socket.io-client';
 import { environment } from '../../../environments/environment';
 import { Observable, Subject, firstValueFrom, fromEvent, timeout } from 'rxjs';
+import { CollaborationUpdate, UserPermissions } from '../components/interfaces/collaboration.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,7 @@ import { Observable, Subject, firstValueFrom, fromEvent, timeout } from 'rxjs';
 export class WebsocketService {
   private socket: Socket;
   private readonly url = environment.wsUrl;
+  private collaborationUpdates = new Subject<CollaborationUpdate>();
 
   constructor () {
     console.log('[WebsocketService] Initializing');
@@ -31,6 +33,48 @@ export class WebsocketService {
 
     this.socket.on('connect_error', (error) => {
       console.error('[WebsocketService] Connection error:', error);
+    });
+
+    // Nuevo listener para actualizaciones de colaboración
+    this.socket.on('collaborationUpdate', (update: CollaborationUpdate) => {
+      console.log('[WebsocketService] Received collaboration update:', update);
+      this.collaborationUpdates.next(update);
+    });
+  }
+
+  onCollaborationUpdates(): Observable<CollaborationUpdate> {
+    return this.collaborationUpdates.asObservable();
+  }
+
+  async updateUserPermissions(
+    sessionId: string,
+    targetUserEmail: string,
+    newPermissions: UserPermissions,
+    requestedBy: string
+  ): Promise<void> {
+    console.log('[WebsocketService] Updating permissions:', {
+      sessionId,
+      targetUserEmail,
+      newPermissions,
+      requestedBy
+    });
+
+    await this.ensureConnection();
+
+    return new Promise((resolve, reject) => {
+      this.socket.emit('updatePermissions', {
+        sessionId,
+        targetUserEmail,
+        newPermissions,
+        requestedBy
+      }, (response: any) => {
+        console.log('[WebsocketService] Update permissions response:', response);
+        if (response.status === 'success') {
+          resolve();
+        } else {
+          reject(new Error(response.message));
+        }
+      });
     });
   }
 
@@ -115,14 +159,6 @@ export class WebsocketService {
       );
     });
   }
-
-  // async sendChanges(sessionId: string, userEmail: string, delta: any): Promise<void> {
-  //   console.log('[WebsocketService] Sending changes:', delta);
-  //
-  //   await this.ensureConnection();
-  //
-  //   this.socket.emit('editorChanges', { sessionId, userEmail, delta });
-  // }
 
   sendChanges (
     sessionId: string,

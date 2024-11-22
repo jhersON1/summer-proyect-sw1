@@ -8,6 +8,7 @@ import Quill from 'quill';
 import { Subscription } from 'rxjs';
 import { EditorChange, QuillDelta } from '../interfaces/editor.interface';
 import Delta from 'quill-delta';
+import { UsersPanelComponent } from '../users-panel/users-panel.component';
 
 @Component({
   selector: 'app-editor',
@@ -18,6 +19,7 @@ import Delta from 'quill-delta';
 export class EditorComponent implements OnInit, OnDestroy {
   @Input() tamanoPapel!: string;
   @ViewChild(QuillEditorComponent) quillEditor!: QuillEditorComponent;
+  @ViewChild('usersPanel') usersPanel!: UsersPanelComponent;
 
   private route = inject(ActivatedRoute);
   private editorService = inject(EditorService);
@@ -166,6 +168,13 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.isCollaborativeMode = true;
       }
     });
+  }
+
+  toggleUsersPanel(): void {
+    console.log('[EditorComponent] Toggling users panel');
+    if (this.usersPanel) {
+      this.usersPanel.toggle();
+    }
   }
 
   ngOnDestroy(): void {

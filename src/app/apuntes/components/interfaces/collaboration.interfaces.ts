@@ -1,33 +1,44 @@
-export interface Invitation {
+export interface CollaborationUser {
   email: string;
-  permissions: CollaborationPermissions;
+  isActive: boolean;
+  displayName?: string;
+  permissions: UserPermissions;
+  lastActivity?: number;
 }
 
-export interface CollaborationPermissions {
+export interface UserPermissions {
   canEdit: boolean;
   canInvite: boolean;
-  canDelete: boolean;
+  canChangePermissions: boolean;
+  canRemoveUsers: boolean;
 }
+
+export type PermissionKey = keyof UserPermissions;
 
 export interface CollaborationSession {
   sessionId: string;
   creatorEmail: string;
-  invitedUsers: Invitation[];
-  activeUsers: Set<string>;
+  users: Map<string, CollaborationUser>;
+  documentId: string;
+  lastUpdate: number;
 }
 
-// Para las respuestas del servidor
-export interface CollaborationResponse {
-  success: boolean;
-  message: string;
-  sessionId?: string;
-  collaborationUrl?: string;
+export interface CollaborationUpdate {
+  type: CollaborationUpdateType;
+  sessionId: string;
+  data: any;
+  timestamp: number;
 }
 
-// Para el estado de la colaboración
-export enum CollaborationStatus {
-  INACTIVE = 'inactive',
-  CONNECTING = 'connecting',
-  ACTIVE = 'active',
-  ERROR = 'error'
+export type CollaborationUpdateType = 
+  | 'USER_JOINED' 
+  | 'USER_LEFT' 
+  | 'PERMISSIONS_CHANGED' 
+  | 'SESSION_UPDATE';
+
+export interface PermissionChangeRequest {
+  sessionId: string;
+  targetUserEmail: string;
+  newPermissions: UserPermissions;
+  requestedBy: string;
 }

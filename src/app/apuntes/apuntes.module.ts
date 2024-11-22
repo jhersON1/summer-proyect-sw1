@@ -22,12 +22,16 @@ import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { QuillModule } from 'ngx-quill';
+import { UsersPanelComponent } from './components/users-panel/users-panel.component';
+import { MenuModule } from 'primeng/menu';
+import { SidebarModule } from 'primeng/sidebar';
 
 @NgModule({
   declarations: [
     ApuntePageComponent,
     EditorComponent,
-    InviteDialogComponent
+    InviteDialogComponent,
+    UsersPanelComponent
   ],
   imports: [
     CommonModule,
@@ -44,6 +48,8 @@ import { QuillModule } from 'ngx-quill';
     DynamicDialogModule,
     ToastModule,
     MessagesModule,
+    MenuModule,
+    SidebarModule,
 
     QuillModule,
 
