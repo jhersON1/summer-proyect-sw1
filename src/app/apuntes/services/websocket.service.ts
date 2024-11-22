@@ -46,38 +46,38 @@ export class WebsocketService {
     return this.collaborationUpdates.asObservable();
   }
 
-  async updateUserPermissions(
-    sessionId: string,
-    targetUserEmail: string,
-    newPermissions: UserPermissions,
-    requestedBy: string
-  ): Promise<void> {
+  async updatePermissions(data: {
+    sessionId: string;
+    targetUserEmail: string;
+    newPermissions: any;
+    requestedByEmail: string;
+  }): Promise<void> {
     console.log('[WebsocketService] Updating permissions:', {
-      sessionId,
-      targetUserEmail,
-      newPermissions,
-      requestedBy
+      sessionId: data.sessionId,
+      targetUser: data.targetUserEmail,
+      requestedBy: data.requestedByEmail,
+      newPermissions: data.newPermissions
     });
 
     await this.ensureConnection();
 
     return new Promise((resolve, reject) => {
       this.socket.emit('updatePermissions', {
-        sessionId,
-        targetUserEmail,
-        newPermissions,
-        requestedBy
+        sessionId: data.sessionId,
+        targetUserEmail: data.targetUserEmail,
+        newPermissions: data.newPermissions,
+        requestedByEmail: data.requestedByEmail
       }, (response: any) => {
         console.log('[WebsocketService] Update permissions response:', response);
         if (response.status === 'success') {
           resolve();
         } else {
+          console.error('[WebsocketService] Permission update failed:', response.message);
           reject(new Error(response.message));
         }
       });
     });
   }
-
   private async ensureConnection (): Promise<void> {
     if (this.socket.connected) {
       console.log('[WebsocketService] Socket already connected');

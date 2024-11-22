@@ -4,6 +4,7 @@ export interface CollaborationUser {
   displayName?: string;
   permissions: UserPermissions;
   lastActivity?: number;
+  isCreator?: any;
 }
 
 export interface UserPermissions {
@@ -30,10 +31,10 @@ export interface CollaborationUpdate {
   timestamp: number;
 }
 
-export type CollaborationUpdateType = 
-  | 'USER_JOINED' 
-  | 'USER_LEFT' 
-  | 'PERMISSIONS_CHANGED' 
+export type CollaborationUpdateType =
+  | 'USER_JOINED'
+  | 'USER_LEFT'
+  | 'PERMISSIONS_CHANGED'
   | 'SESSION_UPDATE';
 
 export interface PermissionChangeRequest {

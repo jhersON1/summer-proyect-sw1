@@ -13,7 +13,7 @@ export class EditorService {
   private authService = inject(AuthService);
   private websocketService = inject(WebsocketService);
   private bufferService = inject(BufferService);
-
+  private creatorEmail: string | null = null;
   private sessionId: string | null = null;
   private isProcessingChanges = false;
   private currentContent: any = null;
@@ -21,24 +21,24 @@ export class EditorService {
   private _initialContentSubject = new Subject<any>();
 
   // Método para obtener el contenido inicial
-  getInitialContent(): Observable<any> {
+  getInitialContent (): Observable<any> {
     return this._initialContentSubject.asObservable();
   }
 
 
   // Método para obtener el contenido actual
-  async getCurrentContent(): Promise<any> {
+  async getCurrentContent (): Promise<any> {
     console.log('[EditorService] Getting current content:', this.currentContent);
     return this.currentContent;
   }
 
   // Método para actualizar el contenido actual
-  setCurrentContent(content: any): void {
+  setCurrentContent (content: any): void {
     console.log('[EditorService] Setting current content:', content);
     this.currentContent = content;
   }
 
-  async initializeCollaborativeSession(invitedUsers: string[], initialContent: any): Promise<string> {
+  async initializeCollaborativeSession (invitedUsers: string[], initialContent: any): Promise<string> {
     console.log('[EditorService] Initializing collaborative session');
     console.log('[EditorService] Initial content:', initialContent);
 
@@ -58,7 +58,9 @@ export class EditorService {
         currentUser.email,
         initialContent
       );
+
       this.sessionId = createResponse.sessionId;
+      this.creatorEmail = currentUser.email;
       console.log('[EditorService] Session created:', this.sessionId);
 
       // Añadir usuarios permitidos
@@ -76,7 +78,7 @@ export class EditorService {
     }
   }
 
-  async joinSession(sessionId: string): Promise<void> {
+  async joinSession (sessionId: string): Promise<void> {
     console.log('[EditorService] Joining session:', sessionId);
     const currentUser = this.authService.currentUser();
 
@@ -97,6 +99,11 @@ export class EditorService {
         this._initialContentSubject.next(response.currentContent.content);
       }
 
+      // Si el usuario actual es el creador, almacenamos su email
+      if (response.isCreator) {
+        this.creatorEmail = currentUser.email;
+      }
+
       console.log('[EditorService] Join successful');
     } catch (error) {
       console.error('[EditorService] Join error:', error);
@@ -104,7 +111,7 @@ export class EditorService {
     }
   }
 
-  getChanges(): Observable<EditorChange> {
+  getChanges (): Observable<EditorChange> {
     console.log('[EditorService] Setting up changes observer');
     return this.websocketService.onEditorChanges().pipe(
       map(change => {
@@ -122,7 +129,7 @@ export class EditorService {
     );
   }
 
-  sendChanges(changes: { delta: any, contents: any }): void {
+  sendChanges (changes: { delta: any, contents: any }): void {
     console.log('[EditorService] Processing changes:', changes);
 
     if (!this.sessionId || this.isProcessingChanges) {
@@ -158,7 +165,7 @@ export class EditorService {
     }
   }
 
-  getUserUpdates(): Observable<CollaborationUpdate> {
+  getUserUpdates (): Observable<CollaborationUpdate> {
     console.log('[EditorService] Setting up user updates stream');
 
     return this.websocketService.onCollaborationUpdates().pipe(
@@ -172,39 +179,50 @@ export class EditorService {
     );
   }
 
-    // Nuevo método para actualizar permisos de usuario
-    async updateUserPermissions(userEmail: string, newPermissions: UserPermissions): Promise<void> {
-      console.log('[EditorService] Updating permissions for user:', userEmail, newPermissions);
+  // Nuevo método para actualizar permisos de usuario
+  async updateUserPermissions(targetUserEmail: string, newPermissions: any): Promise<void> {
+    console.log('[EditorService] Starting permission update for:', targetUserEmail);
+    console.log('[EditorService] New permissions:', newPermissions);
 
-      if (!this.sessionId) {
-        console.error('[EditorService] No active session');
-        throw new Error('No active session');
-      }
-
-      const currentUser = this.authService.currentUser();
-      if (!currentUser) {
-        console.error('[EditorService] No authenticated user');
-        throw new Error('No authenticated user');
-      }
-
-      try {
-        await this.websocketService.updateUserPermissions(
-          this.sessionId,
-          userEmail,
-          newPermissions,
-          currentUser.email
-        );
-        console.log('[EditorService] Permissions updated successfully');
-      } catch (error) {
-        console.error('[EditorService] Error updating permissions:', error);
-        throw error;
-      }
+    if (!this.sessionId) {
+      console.error('[EditorService] No active session found');
+      throw new Error('No hay una sesión activa');
     }
 
-  disconnect(): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      console.error('[EditorService] No authenticated user found');
+      throw new Error('No hay un usuario autenticado');
+    }
+
+    console.log('[EditorService] Current user:', currentUser.email);
+    console.log('[EditorService] Session ID:', this.sessionId);
+    console.log('[EditorService] Creator email:', this.creatorEmail);
+
+    try {
+      await this.websocketService.updatePermissions({
+        sessionId: this.sessionId,
+        targetUserEmail,
+        newPermissions,
+        requestedByEmail: currentUser.email
+      });
+
+      console.log('[EditorService] Permission update successful');
+    } catch (error) {
+      console.error('[EditorService] Error updating permissions:', error);
+      throw new Error('Error al actualizar los permisos');
+    }
+  }
+
+  disconnect (): void {
     console.log('[EditorService] Disconnecting from session');
     this.websocketService.disconnect();
     this.sessionId = null;
     this.currentContent = null;
+  }
+
+  // Método para obtener el email del creador
+  getCreatorEmail(): string | null {
+    return this.creatorEmail;
   }
 }

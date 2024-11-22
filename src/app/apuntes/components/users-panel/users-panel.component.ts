@@ -94,49 +94,97 @@ export class UsersPanelComponent implements OnInit, OnDestroy {
     );
 
     this.initializePermissionsMenu();
+    this.checkCurrentUserPermissions();
+  }
+
+  private checkCurrentUserPermissions(): void {
+    const currentUsers = this.users();
+    const currentUserEmail = this.currentUserEmail();
+    const currentUser = currentUsers.find(u => u.email === currentUserEmail);
+
+    console.log('[UsersPanelComponent] Checking permissions for current user:', currentUser);
+
+    if (currentUser?.permissions) {
+      this.canManagePermissions.set(currentUser.permissions.canChangePermissions);
+      console.log('[UsersPanelComponent] Can manage permissions:', currentUser.permissions.canChangePermissions);
+    }
+  }
+
+  canManageUsers(): boolean {
+    const currentUsers = this.users();
+    const currentUserEmail = this.currentUserEmail();
+    const currentUser = currentUsers.find(u => u.email === currentUserEmail);
+    return currentUser?.permissions?.canChangePermissions || false;
   }
 
   private handleUserUpdate(update: CollaborationUpdate): void {
-    console.log('[UsersPanelComponent] Received user update:', update);
+    console.log('[UsersPanelComponent] Handling user update:', update);
     const currentUsers = this.users();
 
     switch (update.type) {
       case 'USER_JOINED': {
-        const { userEmail, permissions, activeUsers } = update.data;
+        const { userEmail, permissions, activeUsers, isCreator } = update.data;
 
-        // Si hay una lista de usuarios activos, actualizamos toda la lista
         if (Array.isArray(activeUsers)) {
           console.log('[UsersPanelComponent] Updating full users list:', activeUsers);
-          const updatedUsers = activeUsers.map(email => ({
-            email,
-            isActive: true,
-            permissions: email === userEmail ? permissions : this.getDefaultPermissions(),
-            lastActivity: Date.now()
-          }));
+          const updatedUsers = activeUsers.map(email => {
+            // Determinar si el usuario actual es el creador de la sesión
+            const isUserCreator = email === this.editorService.getCreatorEmail();
+            const userPermissions = isUserCreator ? {
+              canEdit: true,
+              canInvite: true,
+              canChangePermissions: true,
+              canRemoveUsers: true
+            } : (email === userEmail ? permissions : this.getDefaultPermissions());
+
+            return {
+              email,
+              isActive: true,
+              permissions: userPermissions,
+              lastActivity: Date.now(),
+              isCreator: isUserCreator
+            };
+          });
           this.users.set(updatedUsers);
         } else {
-          // Si solo hay un nuevo usuario, lo añadimos o actualizamos
           const existingUserIndex = currentUsers.findIndex(u => u.email === userEmail);
+          const isUserCreator = update.data.isCreator;
+
+          const userPermissions = isUserCreator ? {
+            canEdit: true,
+            canInvite: true,
+            canChangePermissions: true,
+            canRemoveUsers: true
+          } : permissions;
 
           if (existingUserIndex >= 0) {
             const updatedUsers = [...currentUsers];
             updatedUsers[existingUserIndex] = {
               ...updatedUsers[existingUserIndex],
               isActive: true,
-              permissions: permissions || updatedUsers[existingUserIndex].permissions,
-              lastActivity: Date.now()
+              permissions: userPermissions,
+              lastActivity: Date.now(),
+              isCreator: isUserCreator
             };
             this.users.set(updatedUsers);
           } else {
             this.users.set([...currentUsers, {
               email: userEmail,
               isActive: true,
-              permissions: permissions || this.getDefaultPermissions(),
-              lastActivity: Date.now()
+              permissions: userPermissions,
+              lastActivity: Date.now(),
+              isCreator: isUserCreator
             }]);
           }
         }
+
+        // Si el usuario actual es el creador, actualizar sus permisos
+        if (userEmail === this.currentUserEmail() && isCreator) {
+          this.canManagePermissions.set(true);
+        }
+        this.checkCurrentUserPermissions();
         break;
+
       }
 
       case 'USER_LEFT': {
@@ -154,6 +202,11 @@ export class UsersPanelComponent implements OnInit, OnDestroy {
           user.email === userEmail ? { ...user, permissions } : user
         );
         this.users.set(updatedUsers);
+
+        // Actualizar permisos del usuario actual si es el afectado
+        if (userEmail === this.currentUserEmail()) {
+          this.checkCurrentUserPermissions();
+        }
         break;
       }
     }
@@ -213,22 +266,40 @@ export class UsersPanelComponent implements OnInit, OnDestroy {
     return match ? match[1] as PermissionKey : null;
   }
 
-  private togglePermission(permission: PermissionKey): void {
-    if (!this.selectedUser) return;
+  private async togglePermission(permission: PermissionKey): Promise<void> {
+    if (!this.selectedUser) {
+      console.error('[UsersPanelComponent] No user selected for permission update');
+      return;
+    }
 
-    console.log('[UsersPanelComponent] Toggling permission:', permission, 'for user:', this.selectedUser.email);
+    console.log('[UsersPanelComponent] Starting permission toggle:', {
+      user: this.selectedUser.email,
+      permission: permission,
+      currentValue: this.selectedUser.permissions[permission]
+    });
 
-    const newPermissions: UserPermissions = {
+    // Crear una copia de los permisos actuales
+    const newPermissions = {
       ...this.selectedUser.permissions,
       [permission]: !this.selectedUser.permissions[permission]
     };
 
-    this.editorService.updateUserPermissions(
-      this.selectedUser.email,
-      newPermissions
-    ).catch((error: any) => {
+    console.log('[UsersPanelComponent] New permissions to be set:', newPermissions);
+
+    try {
+      await this.editorService.updateUserPermissions(
+        this.selectedUser.email,
+        newPermissions
+      );
+
+      console.log('[UsersPanelComponent] Permission update successful');
+
+      // Actualizar la UI solo después de que la actualización sea exitosa
+      this.selectedUser.permissions = newPermissions;
+      this.updateMenuItemStates(this.selectedUser);
+    } catch (error) {
       console.error('[UsersPanelComponent] Error updating permissions:', error);
-    });
+    }
   }
 
   private getDefaultPermissions(): UserPermissions {
