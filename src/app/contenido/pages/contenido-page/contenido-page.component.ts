@@ -321,8 +321,9 @@ export class ContenidoPageComponent implements OnInit {
     if (this.isTema(element))
       this.router.navigateByUrl(`/app/materia/${this.materiaId}/tema/${element.id}`);
 
-    if (this.isApunte(element))
-      console.log(`REDIRIGIR AL EDITOR DEL APUNTE ${element.titulo}`);
+    if (this.isApunte(element)){
+      this.router.navigate([this.router.url, 'apunte', element.id]);
+    }
   }
 
   applyFilter(event: Event) {
