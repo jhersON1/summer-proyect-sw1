@@ -2,9 +2,12 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Tema } from '../../interfaces/tema.interface';
 import { TemaService } from '../../services/tema.service';
-import { switchMap } from 'rxjs';
+import { forkJoin, switchMap } from 'rxjs';
 import { Table, TableRowSelectEvent, TableRowUnSelectEvent } from 'primeng/table';
 import { ConfirmationService, MessageService, SortEvent } from 'primeng/api';
+import { Apunte } from '../../interfaces/apunte.interface';
+import { ApunteService } from '../../services/apunte.service';
+import { MateriaService } from '../../../home/services/materia.service';
 
 @Component({
   templateUrl: './contenido-page.component.html',
@@ -15,12 +18,12 @@ export class ContenidoPageComponent implements OnInit {
   private materiaId: string | null = null;
   public temaPadreId?: number;
 
-  public temas: Tema[] = [];
+  public elements: (Tema | Apunte) [] = [];
 
   @ViewChild('dt')
   private dt!: Table;
   private isSorted?: boolean;
-  private initialValue: Tema[] = [];
+  private initialValue: (Tema | Apunte) [] = [];
 
   private lastClickTime: number = 0;
   private readonly doubleClickThreshold: number = 500;  //500 milisegundos
@@ -30,29 +33,42 @@ export class ContenidoPageComponent implements OnInit {
     nombre: '',
   };
 
-  // public tema!: Tema;
+  public apunte: Apunte = {
+    titulo: '',
+  }
 
   public temaDialog: boolean = false;
+  public apunteDialog: boolean = false;
+  public invitationDialog: boolean = false;
+
+  public title: string = '';
+  public guestEmail: string = '';
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private temaService: TemaService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private apunteService: ApunteService,
+    private materiaService: MateriaService
   ) { }
 
   ngOnInit(): void {
 
     this.materiaId = this.activatedRoute.snapshot.paramMap.get('materiaId');
-    // this.activatedRoute.paramMap.subscribe(params => {
-    //   this.materiaId = params.get('materiaId');
-    // });
+
+    this.apunte.materiaId = +this.materiaId!;
 
     if (!this.router.url.includes('tema')) {
+      this.materiaService.getMateriaById(+this.materiaId!)
+        .subscribe(materia => {
+        this.title = materia.nombre
+        });
+
       this.temaService.getMateriaContentById(+this.materiaId!)
         .subscribe(temas => {
-          this.temas = temas;
+          this.elements = temas;
           this.initialValue = [...temas];
           return;
         });
@@ -63,19 +79,32 @@ export class ContenidoPageComponent implements OnInit {
         .pipe(
           switchMap(({ temaId }) => {
             this.temaPadreId = +temaId;
-            return this.temaService.getTemaContentById(temaId);
+
+            return forkJoin({
+              subtemasResponse: this.temaService.getTemaContentById(temaId), // Obtener subtemas
+              apuntes: this.temaService.getApuntesById(temaId),  // Obtener apuntes
+            });
           })
-        ).subscribe(({ subTemas }) => {
-          this.temas = subTemas;
-          this.initialValue = [...subTemas];
+        ).subscribe(({ subtemasResponse, apuntes }) => {
+          this.title = subtemasResponse.nombre;
+          const temas = subtemasResponse.subTemas;
+          this.elements = [...temas, ...apuntes];
+          this.initialValue = [...this.elements];
           return;
         });
     }
   }
 
-  editTema(tema: Tema) {
-    this.tema = { ...tema };
-    this.temaDialog = true;
+  editElement(element: Tema | Apunte) {
+    if (this.isTema(element)) {
+      this.tema = { ...element };
+      this.temaDialog = true
+    }
+
+    if (this.isApunte(element)) {
+      this.apunte = { ...element };
+      this.apunteDialog = true
+    }
   }
 
   createTema() {
@@ -89,16 +118,19 @@ export class ContenidoPageComponent implements OnInit {
     this.temaDialog = true;
   }
 
+
+  //TODO: Agregar endpoint GET /tema/idTema/apuntes, para obtener los apuntes de un tema
+
   createApunte() {
-
+    this.apunte = {
+      id: -1,
+      titulo: '',
+      materiaId: +this.materiaId!,
+      temaId: this.temaPadreId
+    };
+    // this.submitted = false;
+    this.apunteDialog = true;
   }
-
-  // {
-  //   "id": 123,
-  //   "nombre": "gaaaa",
-  //   "materiaId": 2,
-  //   "temaPadreId": 9
-  // }
 
   saveTema() {
     //TODO: Validacion de nombre de Tema no duplicado la base tiene a nombre de tema unico
@@ -113,13 +145,43 @@ export class ContenidoPageComponent implements OnInit {
     this.temaDialog = false;
   }
 
+  saveApunte() {
+    //TODO: Validacion de nombre de Tema no duplicado la base tiene a nombre de tema unico
+    if (!this.apunte.titulo.trim()) return;
+
+    const apunteId = this.apunte.id;
+    if (apunteId && apunteId !== -1) {
+      this.updateApunte(apunteId);
+    } else {
+      this.storeApunte();
+    }
+    this.apunteDialog = false;
+  }
+
+  sendInvitation() {
+    if (!this.guestEmail.trim()) return;
+    console.log(`ENVIAR INVITACION AL APUNTE ${this.apunte.titulo} al usuario ${this.guestEmail}`);
+    this.messageService.add({ severity: 'success', summary: 'Invitación enviada', detail: `Se invito a ${this.guestEmail} al apunte ${this.apunte.titulo}`, life: 3000 });
+    this.invitationDialog = false;
+  }
+
   private updateTema(temaId: number) {
     this.temaService.updateTema(this.tema)
       .subscribe(tema => {
-        this.temas[this.findIndexById(temaId)] = this.tema;
-        this.initialValue = [...this.temas];
-        this.temas = [...this.temas];
+        this.elements[this.findElementIndexById(temaId, this.isTema)] = this.tema;
+        this.initialValue = [...this.elements];
+        this.elements = [...this.elements];
         this.messageService.add({ severity: 'success', summary: 'Actualización realizada', detail: 'Tema actualizado correctamente', life: 3000 });
+      });
+  }
+
+  private updateApunte(apunteId: number) {
+    this.apunteService.updateApunte(this.apunte)
+      .subscribe(tema => {
+        this.elements[this.findElementIndexById(apunteId, this.isApunte)] = this.apunte;
+        this.initialValue = [...this.elements];
+        this.elements = [...this.elements];
+        this.messageService.add({ severity: 'success', summary: 'Actualización realizada', detail: 'Apunte actualizado correctamente', life: 3000 });
       });
   }
 
@@ -127,15 +189,27 @@ export class ContenidoPageComponent implements OnInit {
     this.temaService.addTema(this.tema)
       .subscribe(tema => {
         this.tema = { ...tema }
-        this.temas.push(this.tema);
+        this.elements.push(this.tema);
+        this.initialValue = [...this.elements];
         this.messageService.add({ severity: 'success', summary: 'Nuevo tema', detail: 'Tema creado correctamente', life: 3000 });
       });
   }
 
-  private findIndexById(id: number): number {
+  private storeApunte() {
+    this.apunteService.addApunte(this.apunte)
+      .subscribe(apunte => {
+        this.apunte = { ...apunte }
+        this.elements.push(this.apunte);
+        this.initialValue = [...this.elements];
+        this.messageService.add({ severity: 'success', summary: 'Nuevo apunte', detail: 'Apunte creado correctamente', life: 3000 });
+      });
+  }
+
+  private findElementIndexById(id: number, typeFilter: (element: Tema | Apunte) => boolean ): number {
     let index = -1;
-    for (let i = 0; i < this.temas.length; i++) {
-      if (this.temas[i].id === id) {
+    for (let i = 0; i < this.elements.length; i++) {
+      const element = this.elements[i];
+      if (typeFilter(element) && element.id === id) {
         index = i;
         break;
       }
@@ -144,9 +218,25 @@ export class ContenidoPageComponent implements OnInit {
     return index;
   }
 
-  hideDialog() {
+  hideTemaDialog() {
     this.temaDialog = false;
     // this.submitted = false;
+  }
+
+  hideApunteDialog() {
+    this.apunteDialog = false;
+  }
+
+  hideInvitationDialog() {
+    this.invitationDialog = false;
+  }
+
+  deleteElement(element: Tema | Apunte) {
+    if (this.isTema(element))
+      this.deleteTema(element);
+
+    if (this.isApunte(element))
+      this.deleteApunte(element);
   }
 
   deleteTema(tema: Tema) {
@@ -158,11 +248,30 @@ export class ContenidoPageComponent implements OnInit {
         this.temaService.deleteTemaById(tema.id)
           .subscribe( temaDeleted => {
             if  (!temaDeleted) {
-              return this.messageService.add({ severity: 'error', summary: `Error: No  se pudo eliminar el tema ${tema.nombre}` , detail: 'Primero debe eliminar sus apuntes', life: 3000 });
+              return this.messageService.add({ severity: 'error', summary: `Error: No  se pudo eliminar el tema ${tema.nombre}` , detail: 'Primero debe eliminar sus apuntes manualmente', life: 3000 });
             }
-            this.temas = this.temas.filter((t) => t.id !== tema.id);
-            this.initialValue = [...this.temas];
+            this.elements = this.elements.filter((element) => !(element.id === tema.id && this.isTema(element)));
+            this.initialValue = [...this.elements];
             this.messageService.add({ severity: 'success', summary: 'Eliminación realizada', detail: `El tema ${tema.nombre} fue eliminado`, life: 3000 });
+          });
+      }
+    });
+  }
+
+  deleteApunte(apunte: Apunte) {
+    this.confirmationService.confirm({
+      message: `¿Esta seguro de eliminar el apunte ${apunte.titulo} ?`,
+      header: 'Eliminar apunte',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.apunteService.deleteApunteById(+apunte.id!)
+          .subscribe( apunteDeleted => {
+            if  (!apunteDeleted) {
+              return this.messageService.add({ severity: 'error', summary: `Error: No  se pudo eliminar el apunte ${apunte.titulo}` , detail: 'Error al eliminar', life: 3000 });
+            }
+            this.elements = this.elements.filter((element) => !(element.id === apunte.id && this.isApunte(element)));
+            this.initialValue = [...this.elements];
+            this.messageService.add({ severity: 'success', summary: 'Eliminación realizada', detail: `El apunte ${apunte.titulo} fue eliminado`, life: 3000 });
           });
       }
     });
@@ -177,7 +286,7 @@ export class ContenidoPageComponent implements OnInit {
       this.sortTableData(event);
     } else if (this.isSorted == false) {
       this.isSorted = undefined;  //null
-      this.temas = [...this.initialValue];
+      this.elements = [...this.initialValue];
       this.dt.reset();
     }
   }
@@ -207,12 +316,31 @@ export class ContenidoPageComponent implements OnInit {
     const currentTime = new Date().getTime();
     if ((currentTime - this.lastClickTime) > this.doubleClickThreshold) return;
 
-    const temaId = event.data.id;
-    this.router.navigateByUrl(`/app/materia/${this.materiaId}/tema/${temaId}`);
+    //const temaId = event.data.id;
+    const element = event.data;
+    if (this.isTema(element))
+      this.router.navigateByUrl(`/app/materia/${this.materiaId}/tema/${element.id}`);
+
+    if (this.isApunte(element))
+      console.log(`REDIRIGIR AL EDITOR DEL APUNTE ${element.titulo}`);
   }
 
   applyFilter(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.dt.filterGlobal(inputElement.value, 'contains');
+  }
+
+  isTema(element: Tema | Apunte): element is Tema {
+    return (element as Tema).nombre !== undefined;
+  }
+
+  isApunte(element: Tema | Apunte): element is Apunte {
+    return (element as Apunte).titulo !== undefined;
+  }
+
+  invitePeople(apunte: Apunte) {
+    this.apunte = { ...apunte };
+    this.guestEmail = '';
+    this.invitationDialog = true;
   }
 }

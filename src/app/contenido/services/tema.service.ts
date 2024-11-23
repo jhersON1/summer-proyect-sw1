@@ -4,6 +4,7 @@ import { Tema } from '../interfaces/tema.interface';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SubtemasResponse } from '../interfaces/subtemas-response.interface';
+import { Apunte } from '../interfaces/apunte.interface';
 
 @Injectable({providedIn: 'root'})
 export class TemaService {
@@ -68,4 +69,17 @@ export class TemaService {
         catchError( err => of(false) ),
       );
   }
+
+  getApuntesById(id: number): Observable<Apunte[]> {
+    const url = `${this.apiUrl}/${id}/apuntes/`;
+
+    const token = localStorage.getItem('token');
+    if (!token) return of([]);
+
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<Apunte[]>(url, { headers });
+  }
+
 }
