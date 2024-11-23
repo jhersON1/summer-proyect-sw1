@@ -1,0 +1,58 @@
+$anchoPantallaMinimo: 992px;
+
+::ng-deep {
+    .ql-container.ql-snow {
+        border: 0px;
+        overflow: auto;
+        padding: 1rem;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .ql-editor {
+        padding: 1in;
+        box-shadow: 0 0 5px 0 rgba(0, 0, 0, .5);
+        margin: 1rem auto;
+    }
+
+    .letter .ql-editor{
+        width: 8.5in;
+        min-height: 11in;
+    }
+
+    .a4 .ql-editor {
+        width: 210mm;
+        min-height: 297mm;
+    }
+
+    .a5 .ql-editor {
+        width: 148mm;
+        min-height: 210mm;
+    }
+
+    .oficio .ql-editor {
+        width: 8.5in;
+        min-height: 14in;
+    }
+
+    .tabloid .ql-editor {
+        width: 11in;
+        min-height: 17in;
+    }
+
+    .infinito .ql-editor {
+        max-width: calc(100vw - 50rem);
+        min-height: 100%;
+        padding: 1rem;
+    }
+
+    @media (max-width: $anchoPantallaMinimo) {
+        .infinito .ql-editor {
+            max-width: 1000rem;
+            width: calc(100vw - 6.5rem);
+            min-height: 100%;
+            padding: 1rem;
+        }
+    }
+}
+

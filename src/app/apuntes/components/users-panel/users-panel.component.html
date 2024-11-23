@@ -1,0 +1,44 @@
+<p-sidebar
+  [(visible)]="visible"
+  position="right"
+  [style]="{width:'30rem'}"
+  styleClass="p-sidebar-md"
+>
+  <ng-template pTemplate="header">
+    <h3>Usuarios Conectados</h3>
+  </ng-template>
+
+  <div class="user-list">
+    @for (user of users(); track user.email) {
+      <div class="user-item p-3 border-bottom-1 surface-border">
+        <div class="flex align-items-center gap-2 mb-2">
+          <span class="user-status" [class.online]="user.isActive"></span>
+          <span class="user-name">{{ user.displayName || user.email }}</span>
+          @if (user.isCreator) {
+            <span class="creator-badge">Creador</span>
+          }
+        </div>
+
+        @if (canManagePermissions() && user.email !== currentUserEmail()) {
+          <div class="permissions-section mt-2">
+            @for (permission of permissions; track permission.key) {
+              <div class="flex align-items-center gap-2 mb-2">
+                <p-checkbox
+                  [ngModel]="user.permissions[permission.key]"
+                  [binary]="true"
+                  (ngModelChange)="onPermissionChange(permission.key, user)"
+                  [inputId]="user.email + '_' + permission.key"
+                ></p-checkbox>
+                <label [for]="user.email + '_' + permission.key" class="cursor-pointer">
+                  {{ permission.label }}
+                </label>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</p-sidebar>
+
+<p-toast position="top-right"></p-toast>
