@@ -5,10 +5,6 @@ import { ApuntePageComponent } from './pages/apunte-page/apunte-page.component';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: '1', pathMatch: 'full'
-  },
-  {
-    path: ':apunteId',
     component: ApuntePageComponent,
   },
 ];

@@ -13,7 +13,7 @@ import { QuillModule } from 'ngx-quill';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     QuillModule.forRoot(),

@@ -11,7 +11,11 @@ const routes: Routes = [
   {
     path: 'tema/:temaId',
     canActivate: [temaExistsGuard],
-    component: ContenidoPageComponent
+    component: ContenidoPageComponent,
+  },
+  {
+    path: 'tema/:temaId/apunte/:apunteId',
+    loadChildren: () => import('../apuntes/apuntes.module').then((m)=> m.ApuntesModule)
   },
   {
     path: '**',

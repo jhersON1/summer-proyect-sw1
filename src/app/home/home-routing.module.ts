@@ -29,10 +29,6 @@ const routes: Routes = [
     canActivate: [materiaExistsGuard],
     loadChildren: () => import('../contenido/contenido.module').then(m => m.ContenidoModule)
   },
-  {
-    path: 'apunte',
-    loadChildren: () => import('../apuntes/apuntes.module').then(m => m.ApuntesModule)
-  },
 ];
 
 @NgModule({
