@@ -19,6 +19,8 @@
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
     "@nestjs/websockets": "^10.4.8",
+    "html2canvas": "^1.4.1",
+    "mermaid": "^11.4.0",
     "ngx-quill": "^25.3.3",
     "ngx-socket-io": "^4.6.1",
     "primeflex": "^3.3.1",

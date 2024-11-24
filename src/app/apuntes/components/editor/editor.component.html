@@ -1,5 +1,15 @@
 <!-- Toolbar de Colaboración -->
 <div class="flex justify-content-end mb-3 gap-2">
+  <p-toast></p-toast>
+  <p-button
+    icon="pi pi-sitemap"
+    label="Generar Mapa Mental"
+    [loading]="isProcessingMindMap"
+    (onClick)="generateMindMap()"
+    [disabled]="!quillInstance || isProcessingMindMap"
+    class="p-button-info"
+  ></p-button>
+
   @if (!isCollaborativeMode) {
     <button
       pButton

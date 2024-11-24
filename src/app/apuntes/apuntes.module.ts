@@ -25,13 +25,16 @@ import { QuillModule } from 'ngx-quill';
 import { UsersPanelComponent } from './components/users-panel/users-panel.component';
 import { MenuModule } from 'primeng/menu';
 import { SidebarModule } from 'primeng/sidebar';
+import { MessageService } from 'primeng/api';
+import { MindMapComponent } from './components/mind-map/mind-map.component';
 
 @NgModule({
   declarations: [
     ApuntePageComponent,
     EditorComponent,
     InviteDialogComponent,
-    UsersPanelComponent
+    UsersPanelComponent,
+    MindMapComponent
   ],
   imports: [
     CommonModule,
@@ -56,6 +59,9 @@ import { SidebarModule } from 'primeng/sidebar';
     QuillEditorComponent,
     ReactiveFormsModule,
     FormsModule,
+  ],
+  providers: [
+    MessageService
   ]
 })
 export class ApuntesModule { }
