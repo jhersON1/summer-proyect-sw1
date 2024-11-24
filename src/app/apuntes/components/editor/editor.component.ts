@@ -9,6 +9,9 @@ import { Subscription } from 'rxjs';
 import { EditorChange, QuillDelta } from '../interfaces/editor.interface';
 import Delta from 'quill-delta';
 import { UsersPanelComponent } from '../users-panel/users-panel.component';
+import { GptService } from '../../services/gpt.service';
+import { MessageService } from 'primeng/api';
+import { MindMapComponent } from '../mind-map/mind-map.component';
 
 @Component({
   selector: 'app-editor',
@@ -24,15 +27,20 @@ export class EditorComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private editorService = inject(EditorService);
   private dialogService = inject(DialogService);
-  private subscriptions: Subscription[] = [];
+  private gptService: GptService = inject(GptService);
+  private messageService = inject(MessageService);
 
-  private quillInstance!: Quill;
+
+  isProcessingMindMap = false;
+
+  private subscriptions: Subscription[] = [];
+  protected quillInstance!: Quill;
   isCollaborativeMode = false;
   isProcessingRemoteChange = false;
   initialized = false;
   private pendingInitialContent: any = null;
 
-  ngOnInit(): void {
+  ngOnInit (): void {
     console.log('[EditorComponent] Initializing...');
 
     // Suscribirse a cambios del editor
@@ -76,7 +84,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  created(quill: Quill) {
+  created (quill: Quill) {
     console.log('[EditorComponent] Quill Editor Created');
     this.quillInstance = quill;
 
@@ -95,7 +103,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.initialized = true;
   }
 
-  private applyInitialContent(content: any) {
+  private applyInitialContent (content: any) {
     if (!this.quillInstance) {
       console.error('[EditorComponent] Cannot apply content - editor not initialized');
       return;
@@ -115,7 +123,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.isProcessingRemoteChange = false;
   }
 
-  changedContent(event: any) {
+  changedContent (event: any) {
     if (!event?.delta || this.isProcessingRemoteChange) {
       console.log('[EditorComponent] Ignoring change event - processing remote change or no delta');
       return;
@@ -142,7 +150,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  async showInviteDialog() {
+  async showInviteDialog () {
     console.log('[EditorComponent] Opening invite dialog');
     if (!this.quillInstance) {
       console.error('[EditorComponent] Quill instance not initialized');
@@ -157,7 +165,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     const ref = this.dialogService.open(InviteDialogComponent, {
       header: 'Invitar Colaboradores',
       width: '50%',
-      contentStyle: { overflow: 'auto' },
+      contentStyle: {overflow: 'auto'},
       baseZIndex: 10000,
       maximizable: true
     });
@@ -170,14 +178,104 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleUsersPanel(): void {
+  toggleUsersPanel (): void {
     console.log('[EditorComponent] Toggling users panel');
     if (this.usersPanel) {
       this.usersPanel.toggle();
     }
   }
 
-  ngOnDestroy(): void {
+  /*
+    * Método para generar un mapa mental a partir del contenido del editor
+  */
+
+  async generateMindMap() {
+    console.log('[EditorComponent] Starting mind map generation');
+
+    if (!this.quillInstance) {
+      console.error('[EditorComponent] Quill instance not initialized');
+      return;
+    }
+
+    try {
+      this.isProcessingMindMap = true;
+      const content = this.quillInstance.getText();
+      console.log('[EditorComponent] Current editor content:', content);
+
+      if (!content.trim()) {
+        console.warn('[EditorComponent] No content to analyze');
+        this.messageService.add({
+          severity: 'warn',
+          detail: 'No hay contenido para analizar'
+        });
+        return;
+      }
+
+      this.gptService.generateMindMap(content).subscribe({
+        next: (response: string) => {
+          console.log('[EditorComponent] Mind map generated successfully');
+          console.log('[EditorComponent] Mermaid code:', response);
+
+          // Aquí podrías mostrar el mapa mental en un diálogo o en otra parte de la UI
+          this.messageService.add({
+            severity: 'success',
+            detail: 'Mapa mental generado correctamente'
+          });
+
+          // Si quieres mostrar el mapa mental en un diálogo, podrías usar:
+          this.showMindMapDialog(response);
+        },
+        error: (error) => {
+          console.error('[EditorComponent] Error generating mind map:', error);
+          let errorMessage = 'Error al generar el mapa mental';
+
+          if (error.status === 201 && error.error.text) {
+            // Si recibimos un 201 con texto, podría ser una respuesta válida
+            console.log('[EditorComponent] Received text response:', error.error.text);
+            this.showMindMapDialog(error.error.text);
+            return;
+          }
+
+          this.messageService.add({
+            severity: 'error',
+            detail: errorMessage
+          });
+        },
+        complete: () => {
+          this.isProcessingMindMap = false;
+          console.log('[EditorComponent] Mind map generation process completed');
+        }
+      });
+
+    } catch (error) {
+      console.error('[EditorComponent] Unexpected error in generateMindMap:', error);
+      this.isProcessingMindMap = false;
+      this.messageService.add({
+        severity: 'error',
+        detail: 'Error inesperado al procesar el contenido'
+      });
+    }
+  }
+
+  private showMindMapDialog(mermaidCode: string) {
+    console.log('[EditorComponent] Opening mindmap dialog');
+
+    const ref = this.dialogService.open(MindMapComponent, {
+      header: 'Mapa Mental',
+      width: '90%',
+      height: '90%',
+      maximizable: true,
+      data: {
+        mermaidCode
+      }
+    });
+
+    ref.onClose.subscribe(() => {
+      console.log('[EditorComponent] Mindmap dialog closed');
+    });
+  }
+
+  ngOnDestroy (): void {
     console.log('[EditorComponent] Destroying component');
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
