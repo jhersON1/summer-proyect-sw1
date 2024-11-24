@@ -265,6 +265,8 @@ export class EditorComponent implements OnInit, OnDestroy {
       width: '90%',
       height: '90%',
       maximizable: true,
+      contentStyle: { overflow: 'hidden' },  // Importante para el renderizado
+      baseZIndex: 10000,
       data: {
         mermaidCode
       }
