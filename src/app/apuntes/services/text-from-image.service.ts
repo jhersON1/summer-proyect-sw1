@@ -26,4 +26,16 @@ export class TextFromImageService {
     return this.http.post<ImageToTextResponse>(url, { image_url: imageUrl }, { headers });
   }
 
+  removeImageFromCloudinary(imageId: string): Observable<boolean> {
+    const url = `${this.apiUrl}/cloudinary/${imageId}`;
+
+    const token = localStorage.getItem('token');
+    //if (!token) return of(null);
+
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`);
+
+    return this.http.delete<boolean>(url, { headers });
+  }
+
 }

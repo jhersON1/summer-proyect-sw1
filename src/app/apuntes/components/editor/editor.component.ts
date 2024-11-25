@@ -325,17 +325,14 @@ export class EditorComponent implements OnInit, OnDestroy {
   public readonly FILE_UPLOAD_ENDPOINT = this.textFromImageService.FILE_UPLOAD_ENDPOINT;
 
   getTextfromImage(e: FileUploadEvent) {
-    console.log('[EditorComponent] Imagen subida a cloudinary');
-    console.log(e);
-    //obtenemos la url de la imagen subida
-
     const originalEvent = e.originalEvent;
     if (originalEvent instanceof HttpResponse) {
       const imageUrl = originalEvent.body.imageUrl;
+      const imageId = this.getImageNameFromUrl(imageUrl);
       this.textFromImageService.getTextFromImage(imageUrl).subscribe(
         ({ content }) => {
-          console.log({ content });
           this.pasteTextOnEditor(content);
+          //una vez obtenido el texto, eliminar la imagen de cloudinary mediante this.textFromImageService.removeImageFromCloudinary(imageId)
           this.messageService.add({ severity: 'info', summary: 'Texto obtenido desde imagen', detail: 'El texto fue copiado al final del documento' });
           return;
         });
@@ -346,9 +343,6 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   private pasteTextOnEditor(text: string) {
-    //Agregar un salto de linea en la ultima linea del documento
-    //Pegar el despues del salto de linea agregado
-
     if (!this.quillInstance) {
       console.error('[EditorComponent] Quill instance not initialized');
       return;
@@ -356,14 +350,22 @@ export class EditorComponent implements OnInit, OnDestroy {
 
     // Obtener la longitud actual del contenido del editor
     const editorLength = this.quillInstance.getLength();
-
     // Insertar un salto de línea al final del contenido
     this.quillInstance.insertText(editorLength - 1, '\n', 'user');
-
     // Pegar el texto después del salto de línea
     this.quillInstance.insertText(editorLength, text, 'user');
-
     console.log('[EditorComponent] Text pasted at the end of the document:', text);
+  }
+
+  private getImageNameFromUrl(url: string): string {
+    // Extraer la parte después del último "/"
+    const fileNameWithExtension = url.split('/').pop();
+    if (!fileNameWithExtension) {
+      throw new Error('URL no contiene un archivo válido');
+    }
+    // Remover la extensión del archivo
+    const fileName = fileNameWithExtension.split('.').slice(0, -1).join('.'); // En caso de nombres con puntos adicionales
+    return fileName;
   }
 
 }
