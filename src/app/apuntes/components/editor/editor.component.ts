@@ -5,13 +5,15 @@ import { EditorService } from '../../services/editor.service';
 import { DialogService } from 'primeng/dynamicdialog';
 import { InviteDialogComponent } from '../invite-dialog/invite-dialog.component';
 import Quill from 'quill';
-import { Subscription } from 'rxjs';
-import { EditorChange, QuillDelta } from '../interfaces/editor.interface';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { EditorChange } from '../interfaces/editor.interface';
 import Delta from 'quill-delta';
 import { UsersPanelComponent } from '../users-panel/users-panel.component';
 import { GptService } from '../../services/gpt.service';
 import { MessageService } from 'primeng/api';
 import { MindMapComponent } from '../mind-map/mind-map.component';
+import { ApunteService } from '../../../contenido/services/apunte.service';
+import { Apunte } from '../../../contenido/interfaces/apunte.interface';
 
 @Component({
   selector: 'app-editor',
@@ -29,10 +31,12 @@ export class EditorComponent implements OnInit, OnDestroy {
   private dialogService = inject(DialogService);
   private gptService: GptService = inject(GptService);
   private messageService = inject(MessageService);
+  private apunteService = inject(ApunteService);
 
+  private apunteId: string | null = null;
+  apunteActual: Apunte | undefined;
 
   isProcessingMindMap = false;
-
   private subscriptions: Subscription[] = [];
   protected quillInstance!: Quill;
   isCollaborativeMode = false;
@@ -40,8 +44,31 @@ export class EditorComponent implements OnInit, OnDestroy {
   initialized = false;
   private pendingInitialContent: any = null;
 
+  private apunteReady$ = new BehaviorSubject<boolean>(false);
+
   ngOnInit (): void {
-    console.log('[EditorComponent] Initializing...');
+    this.apunteId = this.route.snapshot.paramMap.get('apunteId');
+  if (this.apunteId) {
+    this.subscriptions.push(
+      this.apunteService.getApunteById(Number(this.apunteId)).subscribe({
+        next: (apunte: Apunte) => {
+          console.log('[EditorComponent] Received apunte:', apunte);
+          this.apunteActual = apunte;
+
+          // Sincronizar el apunte con el servicio para que esté disponible en saveContent
+          this.editorService.setApunte(apunte);
+
+          // Marcar como listo para aplicar en Quill
+          this.apunteReady$.next(true);
+        },
+        error: (error) => {
+          console.error('[EditorComponent] Error fetching apunte:', error);
+        }
+      })
+    );
+  }
+
+  console.log('[EditorComponent] Initializing... with apunteId:', this.apunteId);
 
     // Suscribirse a cambios del editor
     this.subscriptions.push(
@@ -82,24 +109,32 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.isCollaborativeMode = true;
       }
     });
+
   }
 
-  created (quill: Quill) {
+  async created(quill: Quill) {
     console.log('[EditorComponent] Quill Editor Created');
     this.quillInstance = quill;
 
-    // Si hay contenido inicial pendiente, aplicarlo ahora
+    // Esperar hasta que el apunte esté listo antes de aplicar contenido
+    this.subscriptions.push(
+      this.apunteReady$.subscribe((isReady) => {
+        if (isReady && this.apunteActual) {
+          console.log('[EditorComponent] Applying apunte content to Quill');
+          this.quillInstance.setContents(this.apunteActual.contenido || {});
+          this.editorService.setCurrentContent(this.quillInstance.getContents());
+          this.apunteReady$.next(false); // Resetear para evitar re-aplicar contenido
+        }
+      })
+    );
+
     if (this.pendingInitialContent) {
       console.log('[EditorComponent] Applying pending initial content');
       this.applyInitialContent(this.pendingInitialContent);
       this.pendingInitialContent = null;
-    } else {
-      // Guardar contenido inicial en el servicio
-      const contents = this.quillInstance.getContents();
-      console.log('[EditorComponent] Initial editor contents:', contents);
-      this.editorService.setCurrentContent(contents);
     }
 
+    this.editorService.startAutoSave(this.apunteActual!);
     this.initialized = true;
   }
 
@@ -277,8 +312,9 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy (): void {
+  ngOnDestroy(): void {
     console.log('[EditorComponent] Destroying component');
+    this.editorService.stopAutoSave(); // Detener auto-save al destruir
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }

@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { WebsocketService } from './websocket.service';
-import { map, Observable, Subject, tap } from 'rxjs';
-import { BufferService } from './buffer.service';
+import { interval, map, Observable, Subject, Subscription, tap } from 'rxjs';
+
 import { EditorChange, QuillDelta } from '../components/interfaces/editor.interface';
 import { CollaborationUpdate, UserPermissions } from '../components/interfaces/collaboration.interfaces';
+import { ApunteService } from '../../contenido/services/apunte.service';
+import { Apunte } from '../../contenido/interfaces/apunte.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +14,18 @@ import { CollaborationUpdate, UserPermissions } from '../components/interfaces/c
 export class EditorService {
   private authService = inject(AuthService);
   private websocketService = inject(WebsocketService);
-  private bufferService = inject(BufferService);
+  private apunteService = inject(ApunteService);
+
   private creatorEmail: string | null = null;
   private sessionId: string | null = null;
   private isProcessingChanges = false;
   private currentContent: any = null;
   private _contentSubject = new Subject<EditorChange>();
   private _initialContentSubject = new Subject<any>();
+
+  private apunteActual: Apunte | null = null;
+  private autoSaveInterval = 6000; // 6 segundos
+  private autoSaveSubscription?: Subscription;
 
   // Método para obtener el contenido inicial
   getInitialContent (): Observable<any> {
@@ -214,8 +221,59 @@ export class EditorService {
     }
   }
 
-  disconnect (): void {
+  setApunte(apunte: Apunte): void {
+    console.log('[EditorService] Setting current apunte:', apunte);
+    this.apunteActual = apunte;
+  }
+
+  // Método para iniciar el auto-save
+  startAutoSave(apunte : Apunte): void {
+
+    // Cancelar cualquier suscripción existente
+    this.stopAutoSave();
+
+    console.log('[EditorService] Starting auto-save');
+    this.autoSaveSubscription = interval(this.autoSaveInterval).subscribe(() => {
+      this.saveContent();
+    });
+  }
+
+  // Método para detener el auto-save
+  stopAutoSave(): void {
+    console.log('[EditorService] Stopping auto-save');
+    if (this.autoSaveSubscription) {
+      this.autoSaveSubscription.unsubscribe();
+      this.autoSaveSubscription = undefined;
+    }
+  }
+
+  saveContent(): void {
+    if (!this.apunteActual) {
+      console.error('[EditorService] Cannot save - no hay apunte');
+      return;
+    }
+
+    const updatedApunte = {
+      ...this.apunteActual,
+      contenido: this.currentContent
+    };
+
+    console.log('[EditorService] Saving updated apunte:', updatedApunte);
+
+    this.apunteService.updateApunte(updatedApunte).subscribe({
+      next: () => {
+        console.log('[EditorService] Apunte saved successfully');
+      },
+      error: (error) => {
+        console.error('[EditorService] Error saving apunte:', error);
+      }
+    });
+  }
+
+  // Modificar el método disconnect existente
+  disconnect(): void {
     console.log('[EditorService] Disconnecting from session');
+    this.stopAutoSave(); // Detener el auto-save antes de desconectar
     this.websocketService.disconnect();
     this.sessionId = null;
     this.currentContent = null;

@@ -46,4 +46,12 @@ export class ApunteService {
       );
   }
 
+  getApunteById( id: number): Observable<Apunte> {
+    const url = `${ this.apiUrl }/${ id }`;
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<Apunte>(url, { headers });
+  }
 }
