@@ -27,6 +27,7 @@ import { MenuModule } from 'primeng/menu';
 import { SidebarModule } from 'primeng/sidebar';
 import { MessageService } from 'primeng/api';
 import { MindMapComponent } from './components/mind-map/mind-map.component';
+import { FileUploadModule } from 'primeng/fileupload';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { MindMapComponent } from './components/mind-map/mind-map.component';
     MessagesModule,
     MenuModule,
     SidebarModule,
+    FileUploadModule,
 
     QuillModule,
 
