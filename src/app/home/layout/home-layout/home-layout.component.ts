@@ -22,14 +22,7 @@ export class HomeLayoutComponent implements OnInit{
         command: () =>{
           this.router.navigate(['/app/materias'])
         }
-      },
-      {
-        label: 'Compartido',
-        icon: 'pi pi-palette',
-        command: () => {
-          this.router.navigate(['/app/compartido']);
-        },
-      },
+      }
     ];
 
     this.activeItem = this.tabItems[0];

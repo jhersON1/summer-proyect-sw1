@@ -17,7 +17,7 @@ import { EditorChange } from '../interfaces/editor.interface';
 import Delta from 'quill-delta';
 import { UsersPanelComponent } from '../users-panel/users-panel.component';
 import { GptService } from '../../services/gpt.service';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { MindMapComponent } from '../mind-map/mind-map.component';
 import { ApunteService } from '../../../contenido/services/apunte.service';
 import { Apunte } from '../../../contenido/interfaces/apunte.interface';
@@ -34,7 +34,6 @@ import { HttpEvent, HttpResponse, HttpResponseBase } from '@angular/common/http'
   providers: [DialogService],
 })
 export class EditorComponent implements OnInit, OnDestroy {
-  @Input() tamanoPapel!: string;
   @ViewChild(QuillEditorComponent) quillEditor!: QuillEditorComponent;
   @ViewChild('usersPanel') usersPanel!: UsersPanelComponent;
 
@@ -44,6 +43,9 @@ export class EditorComponent implements OnInit, OnDestroy {
   private gptService: GptService = inject(GptService);
   private messageService = inject(MessageService);
   private apunteService = inject(ApunteService);
+
+  tamanoPapel: string = 'letter';
+  tamanoItems: MenuItem[] | undefined;
 
   private apunteId: string | null = null;
   apunteActual: Apunte | undefined;
@@ -131,7 +133,39 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.isCollaborativeMode = true;
       }
     });
+
+    this.tamanoItems = [
+      {
+        label: 'Carta',
+        command: () => this.cambiarTamanoPapel('letter')
+      },
+      {
+        label: 'Oficio',
+        command: () => this.cambiarTamanoPapel('oficio')
+      },
+      {
+        label: 'Tabloide',
+        command: () => this.cambiarTamanoPapel('tabloid')
+      },
+      {
+        label: 'A4',
+        command: () => this.cambiarTamanoPapel('a4')
+      },
+      {
+        label: 'A5',
+        command: () => this.cambiarTamanoPapel('a5')
+      },
+      {
+        label: 'Infinito',
+        command: () => this.cambiarTamanoPapel('infinito')
+      }
+    ]
   }
+
+  cambiarTamanoPapel(tamano: string){
+    this.tamanoPapel = tamano;
+  }
+
 
   async created(quill: Quill) {
     console.log('[EditorComponent] Quill Editor Created');

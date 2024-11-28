@@ -18,6 +18,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ToastModule } from 'primeng/toast';
 import { MessagesModule } from 'primeng/messages';
+import { SplitButtonModule } from 'primeng/splitbutton';
+
 import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -61,6 +63,7 @@ import { VideoModalComponent } from './components/video-modal/video-modal.compon
     FileUploadModule, // Importa el módulo de PrimeNG
     ButtonModule, // Para el botón
     QuillModule,
+    SplitButtonModule,
 
     QuillEditorComponent,
     ReactiveFormsModule,
