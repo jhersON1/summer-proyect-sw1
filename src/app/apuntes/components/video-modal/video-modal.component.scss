@@ -1,0 +1,27 @@
+div {
+    text-align: left; /* Alinea el contenido principal a la izquierda */
+  }
+  
+  video {
+    border: 1px solid #ccc; /* Borde alrededor del video */
+    border-radius: 8px; /* Esquinas redondeadas */
+    margin-top: 10px; /* Espacio entre el título y el video */
+    max-width: 100%; /* Evita que el video exceda el ancho del contenedor */
+  }
+  
+  .button-container {
+    display: flex; /* Los botones se alinean horizontalmente */
+    justify-content: flex-start; /* Alinea los botones a la izquierda */
+    align-items: center; /* Asegura que los botones estén alineados verticalmente */
+    margin-top: 15px; /* Espacio entre el video y los botones */
+    gap: 10px; /* Espacio adicional entre los botones */
+  }
+  
+  button {
+    padding: 8px 16px; /* Tamaño cómodo de los botones */
+    font-size: 14px; /* Ajuste del tamaño de la fuente */
+    min-width: 100px; /* Asegura que todos los botones tengan un ancho uniforme */
+    text-align: center; /* Centra el texto dentro de los botones */
+    border-radius: 4px; /* Esquinas ligeramente redondeadas */
+  }
+  

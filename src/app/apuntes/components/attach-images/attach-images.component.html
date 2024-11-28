@@ -1,0 +1,31 @@
+<div>
+  <h3>Adjunta imágenes para incluir en el video</h3>
+  <p-fileUpload
+  name="images[]"
+  accept="image/*"
+  customUpload="false"
+  (onSelect)="onSelect($event)"
+  (onClear)="onClear()"
+  [maxFileSize]="1000000"
+  multiple="true"
+  class="file-upload"
+></p-fileUpload>
+
+
+  <div *ngIf="uploadedImages.length > 0">
+    <h4>Imágenes Adjuntadas:</h4>
+    <ul>
+      <li *ngFor="let image of uploadedImages">{{ image.name }}</li>
+    </ul>
+  </div>
+
+  <!-- Mensaje de error -->
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <button
+    pButton
+    label="Confirmar"
+    (click)="confirmSelection()"
+    class="p-button-success"
+  ></button>
+</div>

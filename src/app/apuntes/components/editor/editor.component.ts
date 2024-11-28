@@ -1,4 +1,11 @@
-import { Component, Input, OnInit, ViewChild, inject, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+  inject,
+  OnDestroy,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { QuillEditorComponent } from 'ngx-quill';
 import { EditorService } from '../../services/editor.service';
@@ -14,6 +21,8 @@ import { MessageService } from 'primeng/api';
 import { MindMapComponent } from '../mind-map/mind-map.component';
 import { ApunteService } from '../../../contenido/services/apunte.service';
 import { Apunte } from '../../../contenido/interfaces/apunte.interface';
+import { AttachImagesComponent } from '../attach-images/attach-images.component';
+import { VideoModalComponent } from '../video-modal/video-modal.component';
 import { FileUploadEvent } from 'primeng/fileupload';
 import { TextFromImageService } from '../../services/text-from-image.service';
 import { HttpEvent, HttpResponse, HttpResponseBase } from '@angular/common/http';
@@ -22,7 +31,7 @@ import { HttpEvent, HttpResponse, HttpResponseBase } from '@angular/common/http'
   selector: 'app-editor',
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.scss'],
-  providers: [DialogService]
+  providers: [DialogService],
 })
 export class EditorComponent implements OnInit, OnDestroy {
   @Input() tamanoPapel!: string;
@@ -39,6 +48,8 @@ export class EditorComponent implements OnInit, OnDestroy {
   private apunteId: string | null = null;
   apunteActual: Apunte | undefined;
 
+  // Agrega la propiedad isProcessingVideo
+  isProcessingVideo: boolean = false;
   isProcessingMindMap = false;
   private subscriptions: Subscription[] = [];
   protected quillInstance!: Quill;
@@ -49,29 +60,32 @@ export class EditorComponent implements OnInit, OnDestroy {
 
   private apunteReady$ = new BehaviorSubject<boolean>(false);
 
-  ngOnInit (): void {
+  ngOnInit(): void {
     this.apunteId = this.route.snapshot.paramMap.get('apunteId');
-  if (this.apunteId) {
-    this.subscriptions.push(
-      this.apunteService.getApunteById(Number(this.apunteId)).subscribe({
-        next: (apunte: Apunte) => {
-          console.log('[EditorComponent] Received apunte:', apunte);
-          this.apunteActual = apunte;
+    if (this.apunteId) {
+      this.subscriptions.push(
+        this.apunteService.getApunteById(Number(this.apunteId)).subscribe({
+          next: (apunte: Apunte) => {
+            console.log('[EditorComponent] Received apunte:', apunte);
+            this.apunteActual = apunte;
 
-          // Sincronizar el apunte con el servicio para que esté disponible en saveContent
-          this.editorService.setApunte(apunte);
+            // Sincronizar el apunte con el servicio para que esté disponible en saveContent
+            this.editorService.setApunte(apunte);
 
-          // Marcar como listo para aplicar en Quill
-          this.apunteReady$.next(true);
-        },
-        error: (error) => {
-          console.error('[EditorComponent] Error fetching apunte:', error);
-        }
-      })
+            // Marcar como listo para aplicar en Quill
+            this.apunteReady$.next(true);
+          },
+          error: (error) => {
+            console.error('[EditorComponent] Error fetching apunte:', error);
+          },
+        })
+      );
+    }
+
+    console.log(
+      '[EditorComponent] Initializing... with apunteId:',
+      this.apunteId
     );
-  }
-
-  console.log('[EditorComponent] Initializing... with apunteId:', this.apunteId);
 
     // Suscribirse a cambios del editor
     this.subscriptions.push(
@@ -87,14 +101,17 @@ export class EditorComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('[EditorComponent] Error receiving changes:', error);
-        }
+        },
       })
     );
 
     // Suscribirse a contenido inicial
     this.subscriptions.push(
-      this.editorService.getInitialContent().subscribe(content => {
-        console.log('[EditorComponent] Received initial content from service:', content);
+      this.editorService.getInitialContent().subscribe((content) => {
+        console.log(
+          '[EditorComponent] Received initial content from service:',
+          content
+        );
         if (this.quillInstance) {
           console.log('[EditorComponent] Applying initial content immediately');
           this.applyInitialContent(content);
@@ -106,13 +123,14 @@ export class EditorComponent implements OnInit, OnDestroy {
     );
 
     // Verificar sessionId en URL
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['sessionId']) {
-        console.log('[EditorComponent] Session ID in URL - activating collaborative mode');
+        console.log(
+          '[EditorComponent] Session ID in URL - activating collaborative mode'
+        );
         this.isCollaborativeMode = true;
       }
     });
-
   }
 
   async created(quill: Quill) {
@@ -125,7 +143,9 @@ export class EditorComponent implements OnInit, OnDestroy {
         if (isReady && this.apunteActual) {
           console.log('[EditorComponent] Applying apunte content to Quill');
           this.quillInstance.setContents(this.apunteActual.contenido || {});
-          this.editorService.setCurrentContent(this.quillInstance.getContents());
+          this.editorService.setCurrentContent(
+            this.quillInstance.getContents()
+          );
           this.apunteReady$.next(false); // Resetear para evitar re-aplicar contenido
         }
       })
@@ -141,9 +161,11 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.initialized = true;
   }
 
-  private applyInitialContent (content: any) {
+  private applyInitialContent(content: any) {
     if (!this.quillInstance) {
-      console.error('[EditorComponent] Cannot apply content - editor not initialized');
+      console.error(
+        '[EditorComponent] Cannot apply content - editor not initialized'
+      );
       return;
     }
 
@@ -161,9 +183,11 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.isProcessingRemoteChange = false;
   }
 
-  changedContent (event: any) {
+  changedContent(event: any) {
     if (!event?.delta || this.isProcessingRemoteChange) {
-      console.log('[EditorComponent] Ignoring change event - processing remote change or no delta');
+      console.log(
+        '[EditorComponent] Ignoring change event - processing remote change or no delta'
+      );
       return;
     }
 
@@ -172,7 +196,10 @@ export class EditorComponent implements OnInit, OnDestroy {
     if (this.quillInstance) {
       // Obtener el contenido completo actualizado
       const currentContents = this.quillInstance.getContents();
-      console.log('[EditorComponent] Current editor contents:', currentContents);
+      console.log(
+        '[EditorComponent] Current editor contents:',
+        currentContents
+      );
 
       // Actualizar contenido en el servicio
       this.editorService.setCurrentContent(currentContents);
@@ -182,13 +209,13 @@ export class EditorComponent implements OnInit, OnDestroy {
         // Enviar tanto el delta como el contenido completo
         this.editorService.sendChanges({
           delta: event.delta,
-          contents: currentContents
+          contents: currentContents,
         });
       }
     }
   }
 
-  async showInviteDialog () {
+  async showInviteDialog() {
     console.log('[EditorComponent] Opening invite dialog');
     if (!this.quillInstance) {
       console.error('[EditorComponent] Quill instance not initialized');
@@ -197,15 +224,18 @@ export class EditorComponent implements OnInit, OnDestroy {
 
     // Obtener el contenido actual antes de abrir el diálogo
     const currentContents = this.quillInstance.getContents();
-    console.log('[EditorComponent] Current contents before opening dialog:', currentContents);
+    console.log(
+      '[EditorComponent] Current contents before opening dialog:',
+      currentContents
+    );
     this.editorService.setCurrentContent(currentContents);
 
     const ref = this.dialogService.open(InviteDialogComponent, {
       header: 'Invitar Colaboradores',
       width: '50%',
-      contentStyle: {overflow: 'auto'},
+      contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
-      maximizable: true
+      maximizable: true,
     });
 
     ref.onClose.subscribe((result) => {
@@ -216,7 +246,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleUsersPanel (): void {
+  toggleUsersPanel(): void {
     console.log('[EditorComponent] Toggling users panel');
     if (this.usersPanel) {
       this.usersPanel.toggle();
@@ -224,8 +254,8 @@ export class EditorComponent implements OnInit, OnDestroy {
   }
 
   /*
-    * Método para generar un mapa mental a partir del contenido del editor
-  */
+   * Método para generar un mapa mental a partir del contenido del editor
+   */
 
   async generateMindMap() {
     console.log('[EditorComponent] Starting mind map generation');
@@ -244,7 +274,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         console.warn('[EditorComponent] No content to analyze');
         this.messageService.add({
           severity: 'warn',
-          detail: 'No hay contenido para analizar'
+          detail: 'No hay contenido para analizar',
         });
         return;
       }
@@ -257,7 +287,7 @@ export class EditorComponent implements OnInit, OnDestroy {
           // Aquí podrías mostrar el mapa mental en un diálogo o en otra parte de la UI
           this.messageService.add({
             severity: 'success',
-            detail: 'Mapa mental generado correctamente'
+            detail: 'Mapa mental generado correctamente',
           });
 
           // Si quieres mostrar el mapa mental en un diálogo, podrías usar:
@@ -269,28 +299,35 @@ export class EditorComponent implements OnInit, OnDestroy {
 
           if (error.status === 201 && error.error.text) {
             // Si recibimos un 201 con texto, podría ser una respuesta válida
-            console.log('[EditorComponent] Received text response:', error.error.text);
+            console.log(
+              '[EditorComponent] Received text response:',
+              error.error.text
+            );
             this.showMindMapDialog(error.error.text);
             return;
           }
 
           this.messageService.add({
             severity: 'error',
-            detail: errorMessage
+            detail: errorMessage,
           });
         },
         complete: () => {
           this.isProcessingMindMap = false;
-          console.log('[EditorComponent] Mind map generation process completed');
-        }
+          console.log(
+            '[EditorComponent] Mind map generation process completed'
+          );
+        },
       });
-
     } catch (error) {
-      console.error('[EditorComponent] Unexpected error in generateMindMap:', error);
+      console.error(
+        '[EditorComponent] Unexpected error in generateMindMap:',
+        error
+      );
       this.isProcessingMindMap = false;
       this.messageService.add({
         severity: 'error',
-        detail: 'Error inesperado al procesar el contenido'
+        detail: 'Error inesperado al procesar el contenido',
       });
     }
   }
@@ -303,11 +340,11 @@ export class EditorComponent implements OnInit, OnDestroy {
       width: '90%',
       height: '90%',
       maximizable: true,
-      contentStyle: { overflow: 'hidden' },  // Importante para el renderizado
+      contentStyle: { overflow: 'hidden' }, // Importante para el renderizado
       baseZIndex: 10000,
       data: {
-        mermaidCode
-      }
+        mermaidCode,
+      },
     });
 
     ref.onClose.subscribe(() => {
@@ -315,10 +352,191 @@ export class EditorComponent implements OnInit, OnDestroy {
     });
   }
 
+  async generateVideo() {
+    console.log('[EditorComponent] Starting video generation');
+
+    if (!this.quillInstance) {
+      console.error('[EditorComponent] Quill instance not initialized');
+      this.messageService.add({
+        severity: 'error',
+        detail: 'El editor no está listo para generar el video',
+      });
+      return;
+    }
+
+    const content = this.quillInstance.getText();
+    if (!content.trim()) {
+      this.messageService.add({
+        severity: 'warn',
+        detail: 'No hay contenido para generar el video',
+      });
+      return;
+    }
+
+    this.isProcessingVideo = true; // Activa el estado de carga
+
+    const ref = this.dialogService.open(AttachImagesComponent, {
+      header: 'Adjuntar Imágenes',
+      width: '50%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      maximizable: true,
+      data: { content },
+    });
+
+    // Escuchar cuando el modal se cierra, ya sea por Confirmar o por el botón "X"
+    ref.onClose.subscribe((result) => {
+      if (!result || result?.stopProcessing) {
+        console.log(
+          '[EditorComponent] Video generation stopped by modal close.'
+        );
+        this.isProcessingVideo = false; // Detén cualquier estado de carga
+        return;
+      }
+
+      if (result?.images?.length > 0) {
+        this.gptService.uploadImagesToCloudinary(result.images).subscribe({
+          next: (uploadResponse: any) => {
+            const payload = {
+              prompt: content,
+              images: uploadResponse.images,
+            };
+
+            this.sendToTextToJson(payload);
+          },
+          error: (error) => {
+            this.isProcessingVideo = false; // Detén el estado de carga
+            this.messageService.add({
+              severity: 'error',
+              detail: 'Error al subir imágenes. Intenta de nuevo.',
+            });
+          },
+        });
+      } else {
+        const payload = { prompt: content };
+        this.sendToTextToJson(payload);
+      }
+    });
+  }
+
+  sendToTextToJson(payload: any) {
+    console.log(
+      '[EditorComponent] Sending to /gpt/text-to-json with payload:',
+      payload
+    );
+
+    this.gptService.sendToTextToJson(payload).subscribe({
+      next: (jsonResponse: any) => {
+        console.log(
+          '[EditorComponent] JSON received from /gpt/text-to-json:',
+          jsonResponse
+        );
+
+        // Enviar a /shotstack con el JSON recibido
+        this.sendToShotstack(jsonResponse);
+      },
+      error: (error) => {
+        console.error('[EditorComponent] Error in /gpt/text-to-json:', error);
+        this.messageService.add({
+          severity: 'error',
+          detail: 'Error al procesar el contenido para el video.',
+        });
+      },
+    });
+  }
+
+  sendToShotstack(json: any) {
+    console.log('[EditorComponent] Sending to /shotstack with JSON:', json);
+
+    this.gptService.sendToShotstack(json).subscribe({
+      next: async (response: any) => {
+        const videoId = await response.response;
+
+        console.log(
+          '[EditorComponent] Video ID received from /shotstack:',
+          videoId.id
+        );
+
+        // Consultar el estado del video con el ID recibido
+        this.checkShotstackVideoStatus(videoId.id);
+      },
+      error: (error) => {
+        this.isProcessingVideo = false;
+        console.error('[EditorComponent] Error in /shotstack:', error);
+        this.messageService.add({
+          severity: 'error',
+          detail: 'Error al generar el video.',
+        });
+      },
+    });
+  }
+
+  checkShotstackVideoStatus(videoId: string) {
+    console.log('[EditorComponent] Checking video status for ID:', videoId);
+
+    this.gptService.getVideoUrl(videoId).subscribe({
+      next: (response: any) => {
+        this.isProcessingVideo = false;
+        if (response?.response?.url) {
+          console.log(
+            '[EditorComponent] Video URL received:',
+            response.response.url
+          ); // Aquí se imprime la URL del video
+
+          // Mostrar el video generado
+          this.showGeneratedVideo(response.response.url);
+          this.messageService.add({
+            severity: 'success',
+            detail: 'El video se generó correctamente.',
+          });
+        } else {
+          console.warn('[EditorComponent] No URL found in the response.');
+          this.messageService.add({
+            severity: 'warn',
+            detail: 'No se encontró una URL en la respuesta del servidor.',
+          });
+        }
+      },
+      error: (error) => {
+        this.isProcessingVideo = false;
+        console.error('[EditorComponent] Error fetching video URL:', error);
+        this.messageService.add({
+          severity: 'error',
+          detail:
+            'Error al obtener la URL del video. Por favor, intenta nuevamente.',
+        });
+      },
+    });
+  }
+
+  showGeneratedVideo(videoUrl: string) {
+    console.log('[EditorComponent] Displaying generated video:', videoUrl);
+
+    // Mostrar el video en un modal
+    const ref = this.dialogService.open(VideoModalComponent, {
+      header: 'Video Generado',
+      width: '70%',
+      contentStyle: { overflow: 'hidden' },
+      baseZIndex: 10000,
+      data: {
+        videoUrl: videoUrl, // Pasar la URL del video
+      },
+    });
+
+    ref.onClose.subscribe((result) => {
+      console.log('[EditorComponent] Video modal closed with result:', result);
+
+      if (result?.stopProcessing) {
+        console.log('[EditorComponent] Stopping video generation process.');
+        this.isProcessingVideo = false; // Detén cualquier estado de carga
+      }
+    });
+  }
+
   ngOnDestroy(): void {
     console.log('[EditorComponent] Destroying component');
     this.editorService.stopAutoSave(); // Detener auto-save al destruir
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   private textFromImageService = inject(TextFromImageService);
