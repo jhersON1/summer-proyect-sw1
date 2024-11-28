@@ -1,0 +1,27 @@
+<div>
+  <h3>Video Generado del Apunte</h3>
+  <video controls [src]="videoUrl" width="100%" height="auto" *ngIf="videoUrl">
+    Tu navegador no soporta videos.
+  </video>
+  <p *ngIf="!videoUrl">Cargando video...</p>
+  <div class="button-container">
+    <button
+      pButton
+      label="Cerrar"
+      (click)="closeModal()"
+      class="p-button-danger"
+    ></button>
+    <button
+      pButton
+      label="Descargar"
+      (click)="downloadVideo()"
+      class="p-button-primary"
+    ></button>
+    <button
+      pButton
+      label="Abrir en Otra Ventana"
+      (click)="openInNewTab()"
+      class="p-button-secondary"
+    ></button>
+  </div>
+</div>
