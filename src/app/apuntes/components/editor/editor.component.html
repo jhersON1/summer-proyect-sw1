@@ -1,6 +1,17 @@
 <!-- Toolbar de Colaboración -->
 <div class="flex justify-content-end mb-3 gap-2">
   <p-toast></p-toast>
+
+  <p-fileUpload
+    mode="basic"
+    name="file"
+    chooseIcon="pi pi-image"
+    [url]=FILE_UPLOAD_ENDPOINT
+    accept="image/*" maxFileSize="3000000"
+    (onUpload)="getTextfromImage($event)"
+    [auto]="true"
+    chooseLabel="Obtener texto desde imagen" />
+
   <p-button
     icon="pi pi-sitemap"
     label="Generar Mapa Mental"
