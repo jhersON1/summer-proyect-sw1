@@ -82,8 +82,9 @@ export class MateriasPageComponent implements OnInit{
       id: nuevaMateria.id,
       nombre: nuevaMateria.nombre,
       descripcion: nuevaMateria.descripcion,
-      usuario: currentUser,
+      usuario: nuevaMateria.usuario,
     };
+
     this.materias.push(newMateria);
     this.messageService.add({
       severity: 'info',

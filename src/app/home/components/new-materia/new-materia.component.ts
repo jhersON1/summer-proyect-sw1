@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MateriaService } from '../../services/materia.service';
 import { CreateMateria } from '../../interfaces/create-materia.interface';
 import { CreateMateriaResponse } from '../../interfaces/create-materia-response.interface';
+import { User } from '../../../auth/interfaces';
 
 @Component({
   selector: 'app-new-materia',
@@ -36,6 +37,12 @@ export class NewMateriaComponent {
 
   crearMateria() : void{
     console.log('gola');
+
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+
+    const currentUser = JSON.parse(storedUser) as User;
+
     if(this.createMateriaForm.invalid){
       this.createMateriaForm.markAllAsTouched();
       console.log('que esto');
@@ -43,7 +50,7 @@ export class NewMateriaComponent {
     }
 
     const {nombre, descripcion} = this.createMateriaForm.value;
-    const usuarioId = 1; //obtener de local storage
+    const usuarioId = currentUser.id; //obtener de local storage
 
     const nuevaMateria: CreateMateria =
     {
