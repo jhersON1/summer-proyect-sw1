@@ -6,6 +6,7 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
+import { SplitButtonModule } from 'primeng/splitbutton';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { ButtonModule } from 'primeng/button';
     CommonModule,
     LandingRoutingModule,
     DividerModule,
-    ButtonModule
+    ButtonModule,
+    SplitButtonModule
   ]
 })
 export class LandingModule { }
