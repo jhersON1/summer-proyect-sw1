@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ApuntesRoutingModule } from './apuntes-routing.module';
 
 import { ApuntePageComponent } from './pages/apunte-page/apunte-page.component';
-import { EditorComponent } from "./components/editor/editor.component";
+import { EditorComponent } from './components/editor/editor.component';
 
 import { MenubarModule } from 'primeng/menubar';
 
@@ -18,8 +18,11 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ToastModule } from 'primeng/toast';
 import { MessagesModule } from 'primeng/messages';
+import { SplitButtonModule } from 'primeng/splitbutton';
+
 import { InviteDialogComponent } from './components/invite-dialog/invite-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FileUploadModule } from 'primeng/fileupload';
 
 import { QuillModule } from 'ngx-quill';
 import { UsersPanelComponent } from './components/users-panel/users-panel.component';
@@ -27,6 +30,8 @@ import { MenuModule } from 'primeng/menu';
 import { SidebarModule } from 'primeng/sidebar';
 import { MessageService } from 'primeng/api';
 import { MindMapComponent } from './components/mind-map/mind-map.component';
+import { AttachImagesComponent } from './components/attach-images/attach-images.component';
+import { VideoModalComponent } from './components/video-modal/video-modal.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +39,9 @@ import { MindMapComponent } from './components/mind-map/mind-map.component';
     EditorComponent,
     InviteDialogComponent,
     UsersPanelComponent,
-    MindMapComponent
+    MindMapComponent,
+    AttachImagesComponent,
+    VideoModalComponent,
   ],
   imports: [
     CommonModule,
@@ -53,15 +60,15 @@ import { MindMapComponent } from './components/mind-map/mind-map.component';
     MessagesModule,
     MenuModule,
     SidebarModule,
-
+    FileUploadModule, // Importa el módulo de PrimeNG
+    ButtonModule, // Para el botón
     QuillModule,
+    SplitButtonModule,
 
     QuillEditorComponent,
     ReactiveFormsModule,
     FormsModule,
   ],
-  providers: [
-    MessageService
-  ]
+  providers: [MessageService],
 })
-export class ApuntesModule { }
+export class ApuntesModule {}

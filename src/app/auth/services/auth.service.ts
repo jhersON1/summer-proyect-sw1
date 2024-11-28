@@ -26,11 +26,10 @@ export class AuthService {
   }
 
   private setAuthentication(user: User, token: string): boolean {
-
     this._currentUser.set(user);
     this._authStatus.set(AuthStatus.authenticated);
     localStorage.setItem('token', token);
-
+    localStorage.setItem('user', JSON.stringify(user)); // Store user data
     return true;
   }
 
@@ -54,17 +53,18 @@ export class AuthService {
       return of(false);
     }
 
-    const headers = new HttpHeaders()
-      .set('Authorization', `Bearer ${token}`);
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-    return this.http.get<CheckTokenResponse>(url, { headers })
-      .pipe(
-        map(({ payload, token }) => this.setAuthentication(payload, token)),
-        catchError(() => {
-          this._authStatus.set(AuthStatus.notAuthenticated);
-          return of(false);
-        })
-      );
+    return this.http.get<CheckTokenResponse>(url, { headers }).pipe(
+      map(({ payload, token }) => {
+        this.setAuthentication(payload, token);
+        return true;
+      }),
+      catchError(() => {
+        this.logout();
+        return of(false);
+      })
+    );
   }
 
   logout(): void {

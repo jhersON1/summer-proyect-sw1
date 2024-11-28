@@ -9,7 +9,6 @@
     </div>
     <div class="flex gap-2 ml-auto">
       <p-button label="Home"   icon="pi pi-home" iconPos="left" outlined [routerLink]="['app/materia']"></p-button>
-      <p-button label="Apunte" icon="pi pi-info-circle" iconPos="left" outlined [routerLink]="['/app/apunte']"></p-button>
       <p-button (onClick)="menu.toggle($event)" icon="pi pi-ellipsis-v" outlined/>
     </div>
     <p-menu #menu [model]="items" [popup]="true" />

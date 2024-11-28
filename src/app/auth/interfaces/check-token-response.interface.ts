@@ -4,6 +4,7 @@ export interface CheckTokenResponse {
 }
 
 export interface UserCheckToken {
+    id: number;
     email:    string;
     nombre:   string;
     apellido: string;

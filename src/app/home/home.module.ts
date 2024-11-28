@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { MateriasPageComponent } from './pages/materias-page/materias-page.component';
 import { NewMateriaComponent } from './components/new-materia/new-materia.component';
 import { CardMateriaComponent } from './components/card-materia/card-materia.component';
-import { CompartidosPageComponent } from './pages/compartidos-page/compartidos-page.component';
 import { EditMateriaComponent } from './components/edit-materia/edit-materia.component';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -30,7 +29,6 @@ import { HomeRoutingModule } from './home-routing.module';
     CardMateriaComponent,
     NewMateriaComponent,
     EditMateriaComponent,
-    CompartidosPageComponent,
     HomeLayoutComponent
   ],
   imports: [

@@ -11,13 +11,6 @@ import { EditorService } from '../../services/editor.service';
 export class ApuntePageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private editorService = inject(EditorService);
-  tamanoPapel: string = 'letter';
-
-  items: MenuItem[] | undefined;
-
-  cambiarTamanoPapel(tamano: string){
-      this.tamanoPapel = tamano;
-  }
 
   async ngOnInit() {
     console.log('[ApuntePageComponent] Initializing...');
@@ -37,58 +30,6 @@ export class ApuntePageComponent implements OnInit {
         console.log('[ApuntePageComponent] No session ID in URL');
       }
     });
-
-    // Inicializar menú (código existente)
-    this.initializeMenu();
   }
 
-  private initializeMenu() {
-    // los items del toolbar
-    this.items = [
-      {
-        label: 'Archivo',
-        icon: 'pi pi-folder'
-      },
-      {
-        label: 'Editar',
-        icon: 'pi pi-clipboard'
-      },
-      {
-        label: 'Formato',
-        icon: 'pi pi-file',
-        items: [
-          {
-            label: 'Tamaño de hoja',
-            icon: 'pi pi-expand',
-            items: [
-              {
-                label: 'Carta',
-                command: () => this.cambiarTamanoPapel('letter')
-              },
-              {
-                label: 'Oficio',
-                command: () => this.cambiarTamanoPapel('oficio')
-              },
-              {
-                label: 'Tabloide',
-                command: () => this.cambiarTamanoPapel('tabloid')
-              },
-              {
-                label: 'A4',
-                command: () => this.cambiarTamanoPapel('a4')
-              },
-              {
-                label: 'A5',
-                command: () => this.cambiarTamanoPapel('a5')
-              },
-              {
-                label: 'Infinito',
-                command: () => this.cambiarTamanoPapel('infinito')
-              }
-            ]
-          },
-        ]
-      },
-    ]
-  }
 }

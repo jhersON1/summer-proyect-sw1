@@ -212,6 +212,14 @@ export class InviteDialogComponent implements OnInit {
   close() {
     console.log('[InviteDialog] Closing dialog');
     this.ref.close(this.showUrlSection);
+
+    if (this.showUrlSection) {
+      // Actualizar la URL sin recargar la página
+      window.history.pushState({}, '', this.collaborationUrl);
+
+      // Opcional: Recargar la página si se necesita reinicializar componentes
+      // window.location.href = this.collaborationUrl;
+    }
   }
 
   getFieldError(groupIndex: number): string | null {
