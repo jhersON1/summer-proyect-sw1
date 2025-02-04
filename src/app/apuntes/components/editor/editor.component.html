@@ -14,8 +14,37 @@
     [disabled]="!quillInstance || isProcessingVideo" class="p-button-success"></p-button>
 
   <!-- Agregar este botón junto a los otros en el toolbar -->
-  <p-fileUpload mode="basic" name="file" chooseIcon="pi pi-microphone" [url]="AUDIO_UPLOAD_ENDPOINT" accept="audio/*"
-    maxFileSize="5000000" (onUpload)="getTextFromAudio($event)" [auto]="true" chooseLabel="Texto desde audio" />
+  <p-fileUpload
+  mode="basic"
+  name="file"
+  chooseIcon="pi pi-microphone"
+  [url]="AUDIO_UPLOAD_ENDPOINT"
+  accept="audio/*"
+  maxFileSize="5000000"
+  (onUpload)="getTextFromAudio($event)"
+  [disabled]="isProcessingAudio"
+  [auto]="true"
+  [chooseLabel]="isProcessingAudio ? 'Transcribiendo...' : 'Texto desde audio'"/>
+
+<p-progressBar 
+  *ngIf="isProcessingAudio" 
+  mode="indeterminate" 
+  [style]="{'height': '6px'}" 
+  class="mt-2">
+</p-progressBar>
+
+<!-- Toast personalizado para el progreso -->
+<p-toast position="top-right">
+  <ng-template let-message pTemplate="message">
+    <div class="flex flex-column" style="flex: 1">
+      <div class="text-center">
+        <i class="pi pi-microphone animate-pulse" style="font-size: 3rem"></i>
+        <h4>{{message.summary}}</h4>
+        <p>{{message.detail}}</p>
+      </div>
+    </div>
+  </ng-template>
+</p-toast>
 
   @if (!isCollaborativeMode) {
   <button pButton label="Iniciar Colaboración" icon="pi pi-users" (click)="showInviteDialog()"

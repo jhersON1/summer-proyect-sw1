@@ -641,26 +641,38 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.isProcessingAudio = true;
     const audioFile = e.files[0];
     
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Transcribiendo audio',
+      detail: 'Por favor espere mientras procesamos su audio...',
+      sticky: true,
+      life: 0
+    });
+    
     this.audioService.processAudio(audioFile).subscribe({
       next: (response: AudioTranscriptionResponse) => {
         const transcribedText = response.text;
-        
-        // Insertar el texto transcrito con formato
         const timestamp = new Date().toLocaleString();
         const formattedText = `\n\n[Transcripción de audio - ${timestamp}]\n${transcribedText}\n`;
         
         this.pasteTextOnEditor(formattedText);
+        
+        // Reemplazar el mensaje de progreso con éxito
+        this.messageService.clear();
         this.messageService.add({
           severity: 'success',
-          summary: 'Texto transcrito',
-          detail: `Se transcribieron ${response.segments.length} segmentos de audio`
+          summary: 'Transcripción completada',
+          detail: `Se transcribieron ${response.segments.length} segmentos de audio`,
+          life: 3000
         });
       },
       error: (error) => {
+        this.messageService.clear();
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: error.error?.message || 'Error al procesar el audio'
+          detail: error.error?.message || 'Error al procesar el audio',
+          life: 3000
         });
       },
       complete: () => {
