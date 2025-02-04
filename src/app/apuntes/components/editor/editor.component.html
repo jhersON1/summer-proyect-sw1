@@ -2,70 +2,34 @@
 <div class="flex justify-content-start mb-3 gap-2 md:justify-content-center">
   <p-toast></p-toast>
 
-  <p-splitButton
-    label="Tamaño"
-    [model]="tamanoItems" />
+  <p-splitButton label="Tamaño" [model]="tamanoItems" />
 
-  <p-fileUpload
-    mode="basic"
-    name="file"
-    chooseIcon="pi pi-image"
-    [url]=FILE_UPLOAD_ENDPOINT
-    accept="image/*" maxFileSize="3000000"
-    (onUpload)="getTextfromImage($event)"
-    [auto]="true"
-    chooseLabel="Texto desde imagen"/>
+  <p-fileUpload mode="basic" name="file" chooseIcon="pi pi-image" [url]=FILE_UPLOAD_ENDPOINT accept="image/*"
+    maxFileSize="3000000" (onUpload)="getTextfromImage($event)" [auto]="true" chooseLabel="Texto desde imagen" />
 
-  <p-button
-    icon="pi pi-sitemap"
-    label="Generar Mapa Mental"
-    [loading]="isProcessingMindMap"
-    (onClick)="generateMindMap()"
-    [disabled]="!quillInstance || isProcessingMindMap"
-    class="p-button-info"
-  ></p-button>
+  <p-button icon="pi pi-sitemap" label="Generar Mapa Mental" [loading]="isProcessingMindMap"
+    (onClick)="generateMindMap()" [disabled]="!quillInstance || isProcessingMindMap" class="p-button-info"></p-button>
 
-  <p-button
-    icon="pi pi-video"
-    label="Generar Video"
-    [loading]="isProcessingVideo"
-    (onClick)="generateVideo()"
-    [disabled]="!quillInstance || isProcessingVideo"
-    class="p-button-success"
-  ></p-button>
+  <p-button icon="pi pi-video" label="Generar Video" [loading]="isProcessingVideo" (onClick)="generateVideo()"
+    [disabled]="!quillInstance || isProcessingVideo" class="p-button-success"></p-button>
+
+  <!-- Agregar este botón junto a los otros en el toolbar -->
+  <p-fileUpload mode="basic" name="file" chooseIcon="pi pi-microphone" [url]="AUDIO_UPLOAD_ENDPOINT" accept="audio/*"
+    maxFileSize="5000000" (onUpload)="getTextFromAudio($event)" [auto]="true" chooseLabel="Texto desde audio" />
 
   @if (!isCollaborativeMode) {
-  <button
-    pButton
-    label="Iniciar Colaboración"
-    icon="pi pi-users"
-    (click)="showInviteDialog()"
-    class="p-button-primary"
-  ></button>
+  <button pButton label="Iniciar Colaboración" icon="pi pi-users" (click)="showInviteDialog()"
+    class="p-button-primary"></button>
   } @else {
-  <p-chip
-    label="Modo Colaborativo Activo"
-    icon="pi pi-users"
-    [removable]="true"
-    styleClass="bg-primary"
-  ></p-chip>
-  <p-button
-    icon="pi pi-users"
-    [label]="'Colaboradores'"
-    (onClick)="toggleUsersPanel()"
-  />
+  <p-chip label="Modo Colaborativo Activo" icon="pi pi-users" [removable]="true" styleClass="bg-primary"></p-chip>
+  <p-button icon="pi pi-users" [label]="'Colaboradores'" (onClick)="toggleUsersPanel()" />
   }
 </div>
 
 <!-- Editor Quill -->
 <div [ngClass]="tamanoPapel" class="flex justify-content-start md:justify-content-center">
-  <quill-editor
-    #editor
-    [styles]="{ height: '100vh' }"
-    (onEditorCreated)="created($event)"
-    (onContentChanged)="changedContent($event)"
-    [placeholder]="'Escribe aquí...'"
-  >
+  <quill-editor #editor [styles]="{ height: '100vh' }" (onEditorCreated)="created($event)"
+    (onContentChanged)="changedContent($event)" [placeholder]="'Escribe aquí...'">
     <div quill-editor-toolbar>
       <!-- Opciones del toolbar -->
       <span class="ql-formats">
