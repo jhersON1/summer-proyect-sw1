@@ -26,6 +26,9 @@ import { VideoModalComponent } from '../video-modal/video-modal.component';
 import { FileUploadEvent } from 'primeng/fileupload';
 import { TextFromImageService } from '../../services/text-from-image.service';
 import { HttpEvent, HttpResponse, HttpResponseBase } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+import { AudioService } from '../../services/audio.service';
+import { AudioTranscriptionResponse } from '../interfaces/audio-transcription.interfaces';
 
 @Component({
   selector: 'app-editor',
@@ -43,6 +46,10 @@ export class EditorComponent implements OnInit, OnDestroy {
   private gptService: GptService = inject(GptService);
   private messageService = inject(MessageService);
   private apunteService = inject(ApunteService);
+  private audioService = inject(AudioService);
+
+  isProcessingAudio = false;
+  public readonly AUDIO_UPLOAD_ENDPOINT = `${environment.apiUrl}/gpt/audio-to-text`;
 
   tamanoPapel: string = 'letter';
   tamanoItems: MenuItem[] | undefined;
@@ -162,7 +169,7 @@ export class EditorComponent implements OnInit, OnDestroy {
     ]
   }
 
-  cambiarTamanoPapel(tamano: string){
+  cambiarTamanoPapel(tamano: string) {
     this.tamanoPapel = tamano;
   }
 
@@ -618,6 +625,60 @@ export class EditorComponent implements OnInit, OnDestroy {
     // Remover la extensión del archivo
     const fileName = fileNameWithExtension.split('.').slice(0, -1).join('.'); // En caso de nombres con puntos adicionales
     return fileName;
+  }
+
+
+  getTextFromAudio(e: FileUploadEvent) {
+    if (!this.quillInstance) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Editor no inicializado'
+      });
+      return;
+    }
+  
+    this.isProcessingAudio = true;
+    const audioFile = e.files[0];
+    
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Transcribiendo audio',
+      detail: 'Por favor espere mientras procesamos su audio...',
+      sticky: true,
+      life: 0
+    });
+    
+    this.audioService.processAudio(audioFile).subscribe({
+      next: (response: AudioTranscriptionResponse) => {
+        const transcribedText = response.text;
+        const timestamp = new Date().toLocaleString();
+        const formattedText = `\n\n[Transcripción de audio - ${timestamp}]\n${transcribedText}\n`;
+        
+        this.pasteTextOnEditor(formattedText);
+        
+        // Reemplazar el mensaje de progreso con éxito
+        this.messageService.clear();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Transcripción completada',
+          detail: `Se transcribieron ${response.segments.length} segmentos de audio`,
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.clear();
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.message || 'Error al procesar el audio',
+          life: 3000
+        });
+      },
+      complete: () => {
+        this.isProcessingAudio = false;
+      }
+    });
   }
 
 }
