@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { ValidationsService } from '../../../auth/services/validations.service';
 import { UserService } from '../../services/user.service';
@@ -10,6 +10,7 @@ import { ApuntesCompartidosService } from '../../services/apuntes-compartidos.se
 import { NotificationService } from '../../services/notification.service';
 import { InitEditableRow } from 'primeng/table';
 import { AuthService } from '../../../auth/services/auth.service';
+import { Apunte } from '../../../contenido/interfaces/apunte.interface';
 
 @Component({
   selector: 'app-invite-dialog',
@@ -26,12 +27,14 @@ export class InviteDialogComponent implements OnInit {
   private apuntesCompartidosService: ApuntesCompartidosService = inject(ApuntesCompartidosService);
   private notificationService: NotificationService = inject(NotificationService);
   private authService = inject(AuthService);
-
+  private config = inject(DynamicDialogConfig);
+  
   invitationForm!: FormGroup;
   showUrlSection = false;
   collaborationUrl = '';
   verifiedEmails: Set<string> = new Set();
   isProcessing = false;
+  apunte : Apunte | undefined;
 
   constructor() {
     console.log('[InviteDialog] Constructor initialized');
@@ -39,6 +42,8 @@ export class InviteDialogComponent implements OnInit {
 
   ngOnInit() {
     console.log('[InviteDialog] Initializing component');
+    this.apunte = this.config.data?.apunte;
+
     this.setupForm();
     this.setupEmailValidation();
   }
@@ -171,7 +176,7 @@ export class InviteDialogComponent implements OnInit {
 
       // Obtener el usuario actual (anfitrión)
       const currentUser = await firstValueFrom(this.authService.checkCurrentEmail());
-       
+
       if (!currentUser) {
         throw new Error('No se encontró información del usuario actual');
       }
@@ -179,8 +184,8 @@ export class InviteDialogComponent implements OnInit {
       // Primero guardamos el apunte para el anfitrión
       try {
         await this.apuntesCompartidosService.createApunteCompartido({
-          
-          nombre_apunte: ` 'Apunte'} (Compartido por mí)`,
+
+          nombre_apunte: this.apunte?.titulo || 'Apunte Compartido Anfitrión',
           url: this.collaborationUrl,
           usuarioId: currentUser.id
         }).toPromise();
@@ -200,7 +205,7 @@ export class InviteDialogComponent implements OnInit {
           // Primero guardamos el apunte compartido
           await this.apuntesCompartidosService.createApunteCompartido({
             //todo: hacer método para capturar el nombre del apunte
-            nombre_apunte: 'Apunte Compartido',
+            nombre_apunte: this.apunte?.titulo || 'Apunte Compartido Invitado',
             url: this.collaborationUrl,
             usuarioId: userId
           }).toPromise();
