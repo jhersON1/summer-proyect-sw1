@@ -37,15 +37,15 @@ export class AppComponent {
         return;
 
       case AuthStatus.authenticated:
-        const currentUrl = this.router.url;
-        const hasSessionId = currentUrl.includes('sessionId');
-        if (!hasSessionId && (currentUrl === '/' || currentUrl.startsWith('/auth'))) {
-          this.router.navigateByUrl('/app');
-        }
-        return;
+        // const currentUrl = this.router.url;
+        // const hasSessionId = currentUrl.includes('sessionId');
+        // if (!hasSessionId && (currentUrl === '/' || currentUrl.startsWith('/auth'))) {
+        //   this.router.navigateByUrl('/app');
+        // }
+        // return;
 
-      // this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
-      // return;
+      this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
+      return;
 
       case AuthStatus.notAuthenticated:
         this.router.navigateByUrl('/auth/login');
