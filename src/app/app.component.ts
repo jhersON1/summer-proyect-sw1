@@ -40,13 +40,14 @@ export class AppComponent {
         return;
 
       case AuthStatus.authenticated:
-        const currentUrl = this.router.url;
-        if (currentUrl.startsWith('')) {
-          this.router.navigateByUrl('/app').then(() => true);
-        }
-        return;
+      // Si está en la raíz o en auth, redirigir a /app/materia
+      if (attemptedUrl === '/' || attemptedUrl.startsWith('/auth')) {
+        this.router.navigateByUrl('/app/materia');
+      }
+      // Si no, mantener la URL actual
+      return;
         //this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
-        return;
+        //return;
 
       case AuthStatus.notAuthenticated:
         this.router.navigateByUrl('/auth/login');
