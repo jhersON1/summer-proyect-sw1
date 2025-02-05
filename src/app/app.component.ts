@@ -15,24 +15,19 @@ export class AppComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  private lastValidUrl: string | null = null;
-
   constructor() {
     // Guardar la última URL válida
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.lastValidUrl = event.url;
-      }
+    ).subscribe((event: any) => {
+      localStorage.setItem('lastValidUrl', event.urlAfterRedirects);
     });
   }
-  
+
   public finishedAuthCheck = computed<boolean>(() => this.authService.authStatus() !== 'checking');
 
   public authStatusChangedEffect = effect(() => {
-    const attemptedUrl = this.router.url;
-    if (attemptedUrl === '/') return;
+    const attemptedUrl = localStorage.getItem('lastValidUrl') || '/';
 
     switch (this.authService.authStatus()) {
 
@@ -40,14 +35,11 @@ export class AppComponent {
         return;
 
       case AuthStatus.authenticated:
-      // Si está en la raíz o en auth, redirigir a /app/materia
-      if (attemptedUrl === '/' || attemptedUrl.startsWith('/auth')) {
-        this.router.navigateByUrl('/app/materia');
-      }
-      // Si no, mantener la URL actual
-      return;
-        //this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
-        //return;
+        this.router.navigateByUrl(attemptedUrl);
+        return;
+
+      //this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
+      //return;
 
       case AuthStatus.notAuthenticated:
         this.router.navigateByUrl('/auth/login');
