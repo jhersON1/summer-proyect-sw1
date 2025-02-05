@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 interface ApunteCompartido {
     id: number;
@@ -31,9 +31,12 @@ export class ApuntesCompartidosService {
     }
 
     getApuntesCompartidosByEmail(email: string): Observable<ApunteCompartido[]> {
+        console.log('[ApuntesCompartidosService] Getting shared notes for:', email);
         const token = localStorage.getItem('token');
         const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-        return this.http.get<ApunteCompartido[]>(`${this.apiUrl}/user/email/${email}`);
+        return this.http.get<ApunteCompartido[]>(`${this.apiUrl}/user/email/${email}`).pipe(
+            tap(response => console.log('[ApuntesCompartidosService] Shared notes:', response))
+        );
     }
 }

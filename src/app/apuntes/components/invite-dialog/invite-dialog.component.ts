@@ -190,6 +190,7 @@ export class InviteDialogComponent implements OnInit {
           usuarioId: currentUser.id
         }).toPromise();
 
+        console.log('[InviteDialog] Current user:', currentUser);
         console.log('[InviteDialog] Shared note saved for host');
       } catch (error) {
         console.error('[InviteDialog] Error saving shared note for host:', error);
@@ -210,6 +211,8 @@ export class InviteDialogComponent implements OnInit {
             usuarioId: userId
           }).toPromise();
 
+          console.log('[InviteDialog] Saving shared note for guest:', email);
+          
           // Luego intentamos enviar la notificación (no esperamos la respuesta)
           this.notificationService.sendNotification(email, this.collaborationUrl)
             .subscribe({
