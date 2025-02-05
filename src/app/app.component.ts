@@ -1,7 +1,8 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { AuthService } from './auth/services/auth.service';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { AuthStatus } from './auth/interfaces';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,19 @@ export class AppComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  private lastValidUrl: string | null = null;
+
+  constructor() {
+    // Guardar la última URL válida
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.lastValidUrl = event.url;
+      }
+    });
+  }
+  
   public finishedAuthCheck = computed<boolean>(() => this.authService.authStatus() !== 'checking');
 
   public authStatusChangedEffect = effect(() => {
@@ -26,7 +40,12 @@ export class AppComponent {
         return;
 
       case AuthStatus.authenticated:
-        this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
+        const currentUrl = this.router.url;
+        if (currentUrl.startsWith('')) {
+          this.router.navigateByUrl('/app').then(() => true);
+        }
+        return;
+        //this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
         return;
 
       case AuthStatus.notAuthenticated:
