@@ -12,12 +12,12 @@ const routes: Routes = [
   },
   {
     path: 'auth',
-    //canActivate: [isNotAuthenticatedGuard],
+    canActivate: [isNotAuthenticatedGuard],
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
     path: 'app',
-    //canActivate: [isAuthenticatedGuard],
+    canActivate: [isAuthenticatedGuard],
     component: LayoutPageComponent,
     loadChildren: () => import('./home/home.module').then(m => m.HomeModule)
   },
