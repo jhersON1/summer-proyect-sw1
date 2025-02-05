@@ -21,7 +21,7 @@ const routes: Routes = [
   },
   {
     path: 'materia/:materiaId',
-    canActivate: [materiaExistsGuard],
+    //canActivate: [materiaExistsGuard],
     loadChildren: () => import('../contenido/contenido.module').then(m => m.ContenidoModule)
   },
 ];
