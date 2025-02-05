@@ -187,7 +187,7 @@ export class InviteDialogComponent implements OnInit {
 
           nombre_apunte: this.apunte?.titulo || 'Apunte Compartido Anfitrión',
           url: this.collaborationUrl,
-          usuarioId: currentUser.id
+          usuarioId: currentUser.payload.id
         }).toPromise();
 
         console.log('[InviteDialog] Current user:', currentUser);
@@ -212,7 +212,7 @@ export class InviteDialogComponent implements OnInit {
           }).toPromise();
 
           console.log('[InviteDialog] Saving shared note for guest:', email);
-          
+
           // Luego intentamos enviar la notificación (no esperamos la respuesta)
           this.notificationService.sendNotification(email, this.collaborationUrl)
             .subscribe({
