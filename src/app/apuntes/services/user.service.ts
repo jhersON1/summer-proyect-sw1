@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 interface UserCheckResponse {
   exists: boolean;
@@ -44,5 +44,29 @@ export class UserService {
         return throwError(() => 'Error al verificar el usuario');
       })
     );
+  }
+
+  getUserIdByEmail(email: string): Observable<number> {
+    console.log('[UserService] Getting user ID for email:', email);
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return throwError(() => 'No hay token de autenticación');
+    }
+
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<{id: number}>(`${this.apiUrl}/usuarios/id/${email}`, { headers })
+      .pipe(
+        map(response => response.id),
+        catchError(error => {
+          console.error('[UserService] Error getting user ID:', error);
+          if (error.status === 404) {
+            return throwError(() => 'Usuario no encontrado');
+          }
+          return throwError(() => 'Error al obtener el ID del usuario');
+        })
+      );
   }
 }

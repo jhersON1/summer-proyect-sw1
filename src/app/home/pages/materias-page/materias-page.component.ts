@@ -8,6 +8,7 @@ import { CreateMateriaResponse } from '../../interfaces/create-materia-response.
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { AuthService } from '../../../auth/services/auth.service';
 import { User } from '../../../auth/interfaces';
+import { ApuntesCompartidosService } from '../../../apuntes/services/apuntes-compartidos.service';
 
 @Component({
   selector: 'app-materias-page',
@@ -21,16 +22,21 @@ export class MateriasPageComponent implements OnInit{
   showEditMateria: boolean = false;
   selectedMateriaEditar!: Materia | null; // Materia seleccionada para editar
 
+  apuntesCompartidos: any[] = [];
+  loadingApuntesCompartidos = false;
+
   constructor(
     private router: Router,
     private materiaService: MateriaService,
     private messageService: MessageService, // Esto es para las notificaciones de primeng
     private confirmationService: ConfirmationService, //servicio para el dialogo de confirmacion
     private authService: AuthService,
+    private apuntesCompartidosService: ApuntesCompartidosService,
   ) {}
 
   ngOnInit() {
     this.loadMaterias();
+    this.loadApuntesCompartidos();
   }
 
   loadMaterias(): void {
@@ -152,5 +158,39 @@ export class MateriasPageComponent implements OnInit{
         });
       },
     });
+  }
+
+  loadApuntesCompartidos(): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser?.email) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo obtener el usuario actual',
+      });
+      return;
+    }
+
+    this.loadingApuntesCompartidos = true;
+    this.apuntesCompartidosService.getApuntesCompartidosByEmail(currentUser.email)
+      .subscribe({
+        next: (response: any) => {
+          this.apuntesCompartidos = response.data;
+          this.loadingApuntesCompartidos = false;
+        },
+        error: (error) => {
+          console.error('Error loading shared notes:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudieron cargar los apuntes compartidos'
+          });
+          this.loadingApuntesCompartidos = false;
+        }
+      });
+  }
+
+  navigateToSharedNote(url: string): void {
+    window.open(url, '_blank');
   }
 }

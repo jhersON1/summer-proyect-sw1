@@ -29,3 +29,48 @@
        />
   </div>
 </div>
+
+<div class="mt-4">
+  <h2 class="text-2xl mb-3">Apuntes Compartidos</h2>
+  
+  <!-- Loader -->
+  <div *ngIf="loadingApuntesCompartidos" class="flex justify-content-center">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
+
+  <!-- Mensaje si no hay apuntes -->
+  <div *ngIf="!loadingApuntesCompartidos && apuntesCompartidos.length === 0" 
+       class="p-4 text-center text-gray-600">
+    No tienes apuntes compartidos
+  </div>
+
+  <!-- Lista de apuntes compartidos -->
+  <div *ngIf="!loadingApuntesCompartidos && apuntesCompartidos.length > 0" 
+       class="grid">
+    <div *ngFor="let apunte of apuntesCompartidos" 
+         class="col-12 md:col-6 lg:col-4 xl:col-3">
+      <p-card [header]="apunte.nombreApunte" styleClass="h-full">
+        <ng-template pTemplate="header">
+          <img alt="Apunte compartido" src="https://primefaces.org/cdn/primeng/images/card-ng.jpg" 
+               class="w-full" style="max-height: 120px; object-fit: cover;">
+        </ng-template>
+        
+        <div class="flex flex-column gap-2">
+          <small class="text-gray-600">
+            Compartido por: {{apunte.usuario.nombre}}
+          </small>
+        </div>
+
+        <ng-template pTemplate="footer">
+          <div class="flex justify-content-end">
+            <p-button icon="pi pi-external-link" 
+                      label="Abrir" 
+                      (onClick)="navigateToSharedNote(apunte.url)"
+                      styleClass="p-button-primary">
+            </p-button>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+  </div>
+</div>
