@@ -9,3 +9,7 @@ export interface UserCheckToken {
     nombre:   string;
     apellido: string;
 }
+
+export interface CheckTokenEmailResponse {
+    payload: UserCheckToken;
+}

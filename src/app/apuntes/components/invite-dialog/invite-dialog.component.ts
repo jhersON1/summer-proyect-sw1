@@ -9,6 +9,7 @@ import { debounceTime, distinctUntilChanged, filter, firstValueFrom, switchMap }
 import { ApuntesCompartidosService } from '../../services/apuntes-compartidos.service';
 import { NotificationService } from '../../services/notification.service';
 import { InitEditableRow } from 'primeng/table';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-invite-dialog',
@@ -24,6 +25,7 @@ export class InviteDialogComponent implements OnInit {
   private messageService = inject(MessageService);
   private apuntesCompartidosService: ApuntesCompartidosService = inject(ApuntesCompartidosService);
   private notificationService: NotificationService = inject(NotificationService);
+  private authService = inject(AuthService);
 
   invitationForm!: FormGroup;
   showUrlSection = false;
@@ -166,16 +168,39 @@ export class InviteDialogComponent implements OnInit {
       const baseUrl = window.location.href.split('?')[0];
       this.collaborationUrl = `${baseUrl}?sessionId=${sessionId}`;
 
+
+      // Obtener el usuario actual (anfitrión)
+      const currentUser = await firstValueFrom(this.authService.checkCurrentEmail());
+       
+      if (!currentUser) {
+        throw new Error('No se encontró información del usuario actual');
+      }
+
+      // Primero guardamos el apunte para el anfitrión
+      try {
+        await this.apuntesCompartidosService.createApunteCompartido({
+          
+          nombre_apunte: ` 'Apunte'} (Compartido por mí)`,
+          url: this.collaborationUrl,
+          usuarioId: currentUser.id
+        }).toPromise();
+
+        console.log('[InviteDialog] Shared note saved for host');
+      } catch (error) {
+        console.error('[InviteDialog] Error saving shared note for host:', error);
+        // No detenemos el proceso si falla el guardado para el anfitrión
+      }
+
       // Guardar los apuntes compartidos
       for (const email of invitedEmails) {
         try {
           // Obtener el ID del usuario antes de crear el apunte compartido
           const userId = await firstValueFrom(this.userService.getUserIdByEmail(email));
-          
+
           // Primero guardamos el apunte compartido
           await this.apuntesCompartidosService.createApunteCompartido({
             //todo: hacer método para capturar el nombre del apunte
-            nombre_apunte:  'Apunte Compartido',
+            nombre_apunte: 'Apunte Compartido',
             url: this.collaborationUrl,
             usuarioId: userId
           }).toPromise();
