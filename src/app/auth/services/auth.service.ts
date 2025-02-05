@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, map, mergeMap, Observable, of, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AuthStatus, CheckTokenResponse, LoginResponse, RegisterBody, RegisterResponse, User } from '../interfaces';
+import { AuthStatus, CheckTokenEmailResponse, CheckTokenResponse, LoginResponse, RegisterBody, RegisterResponse, User } from '../interfaces';
 
 
 @Injectable({
@@ -66,6 +66,20 @@ export class AuthService {
       })
     );
   }
+
+  checkCurrentEmail(){
+    const url = `${this.apiUrl}/auth/check-email`;
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      this.logout();
+    }
+
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<any>(url, { headers });
+  }
+
 
   logout(): void {
     this._currentUser.set(null);
