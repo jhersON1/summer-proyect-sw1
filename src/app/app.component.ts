@@ -27,7 +27,7 @@ export class AppComponent {
   public finishedAuthCheck = computed<boolean>(() => this.authService.authStatus() !== 'checking');
 
   public authStatusChangedEffect = effect(() => {
-    const attemptedUrl = localStorage.getItem('lastValidUrl') || '/';
+    const lastValidUrl = localStorage.getItem('lastValidUrl');
 
     switch (this.authService.authStatus()) {
 
@@ -35,8 +35,12 @@ export class AppComponent {
         return;
 
       case AuthStatus.authenticated:
-        this.router.navigateByUrl(attemptedUrl);
-        return;
+        if (lastValidUrl && lastValidUrl.startsWith('/app/materia')) {
+          this.router.navigateByUrl(lastValidUrl);
+      } else {
+          this.router.navigateByUrl('/app/materia');
+      }
+      return;
 
       //this.router.navigateByUrl('/app'); //O redireccionar a la ruta que el usuario intentaba acceder que guardamos en localStorage con item url
       //return;
