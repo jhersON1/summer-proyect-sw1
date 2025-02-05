@@ -22,6 +22,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { HomeLayoutComponent } from './layout/home-layout/home-layout.component';
 import { HomeRoutingModule } from './home-routing.module';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { HomeRoutingModule } from './home-routing.module';
     InputTextModule,
     InputTextareaModule,
     ConfirmDialogModule,
+    ProgressSpinnerModule
   ],
   providers:[
     MessageService,

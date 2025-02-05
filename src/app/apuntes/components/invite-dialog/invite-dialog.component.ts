@@ -5,7 +5,10 @@ import { MessageService } from 'primeng/api';
 import { ValidationsService } from '../../../auth/services/validations.service';
 import { UserService } from '../../services/user.service';
 import { EditorService } from '../../services/editor.service';
-import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, firstValueFrom, switchMap } from 'rxjs';
+import { ApuntesCompartidosService } from '../../services/apuntes-compartidos.service';
+import { NotificationService } from '../../services/notification.service';
+import { InitEditableRow } from 'primeng/table';
 
 @Component({
   selector: 'app-invite-dialog',
@@ -19,6 +22,8 @@ export class InviteDialogComponent implements OnInit {
   private editorService = inject(EditorService);
   private ref = inject(DynamicDialogRef);
   private messageService = inject(MessageService);
+  private apuntesCompartidosService: ApuntesCompartidosService = inject(ApuntesCompartidosService);
+  private notificationService: NotificationService = inject(NotificationService);
 
   invitationForm!: FormGroup;
   showUrlSection = false;
@@ -160,6 +165,33 @@ export class InviteDialogComponent implements OnInit {
       // Construir URL colaborativa con el ID de sesión
       const baseUrl = window.location.href.split('?')[0];
       this.collaborationUrl = `${baseUrl}?sessionId=${sessionId}`;
+
+      // Guardar los apuntes compartidos
+      for (const email of invitedEmails) {
+        try {
+          // Obtener el ID del usuario antes de crear el apunte compartido
+          const userId = await firstValueFrom(this.userService.getUserIdByEmail(email));
+          
+          // Primero guardamos el apunte compartido
+          await this.apuntesCompartidosService.createApunteCompartido({
+            //todo: hacer método para capturar el nombre del apunte
+            nombre_apunte:  'Apunte Compartido',
+            url: this.collaborationUrl,
+            usuarioId: userId
+          }).toPromise();
+
+          // Luego intentamos enviar la notificación (no esperamos la respuesta)
+          this.notificationService.sendNotification(email, this.collaborationUrl)
+            .subscribe({
+              error: (err) => console.warn(`No se pudo enviar notificación a ${email}:`, err)
+            });
+
+        } catch (error) {
+          console.warn(`Error al guardar apunte compartido para ${email}:`, error);
+          // Continuamos con el siguiente email
+        }
+      }
+
       this.showUrlSection = true;
 
     } catch (error) {
