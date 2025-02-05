@@ -211,10 +211,10 @@ export class InviteDialogComponent implements OnInit {
           }).toPromise();
 
           // Luego intentamos enviar la notificación (no esperamos la respuesta)
-          // this.notificationService.sendNotification(email, this.collaborationUrl)
-          //   .subscribe({
-          //     error: (err) => console.warn(`No se pudo enviar notificación a ${email}:`, err)
-          //   });
+          this.notificationService.sendNotification(email, this.collaborationUrl)
+            .subscribe({
+              error: (err) => console.warn(`No se pudo enviar notificación a ${email}:`, err)
+            });
 
         } catch (error) {
           console.warn(`Error al guardar apunte compartido para ${email}:`, error);
