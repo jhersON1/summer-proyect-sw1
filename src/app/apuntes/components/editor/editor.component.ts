@@ -277,6 +277,9 @@ export class EditorComponent implements OnInit, OnDestroy {
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
       maximizable: true,
+      data: {
+        apunte: this.apunteActual
+      }
     });
 
     ref.onClose.subscribe((result) => {
